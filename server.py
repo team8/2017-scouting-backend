@@ -6,7 +6,7 @@ app = Flask(__name__)
 auth_code = open(sys.argv[1]).readlines()[0].strip()
 
 @app.route('/test/<string:auth>', methods=['GET'])
-def index(auth):
+def test(auth):
     if auth == auth_code:
     	return jsonify({'connection':'success'})
     else:
