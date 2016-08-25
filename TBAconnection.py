@@ -10,7 +10,7 @@ def get_matches_with_teams(eventKey):
 	data = urllib2.urlopen(request).read().decode('utf-8')
 	jsonvar = json.loads(data)
 
-	retern_val = []
+	return_val = []
 	for i in jsonvar:
 		return_val.append(TBAMatch(i))
 
