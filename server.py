@@ -6,14 +6,14 @@ app = Flask(__name__)
 # Pass the auth file in as an argument
 auth_code = open(sys.argv[1]).readlines()[0].strip()
 
-@app.route('/test/<string:auth>', methods=['GET'])
+@app.route('/<string:auth>/test/', methods=['GET'])
 def test(auth):
     if auth == auth_code:
     	return jsonify({'connection':'success'})
     else:
     	return jsonify({'connection':'failed'})
 
-@app.route('/match/<string:auth>/<string:event>')
+@app.route('/<string:auth>/match/<string:event>')
 def match(auth, event):
 	if auth != auth_code:
 		return jsonify({'query':{'success' : 'no'}})
