@@ -20,7 +20,7 @@ def match(auth, event):
 
 	result = {'query' : {'success' : 'yes'}}
 	matches = TBAconnection.get_matches_with_teams(event)
-	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
+	result['query']['matches'] = {i.comp_level + str(i.match_number) : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
 	return jsonify(result)
 
 if __name__ == '__main__':
