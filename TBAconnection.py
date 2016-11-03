@@ -1,12 +1,12 @@
-import urllib2
+import requests
 import json
 
 def get_matches_with_teams(eventKey):
 	"""
 	Method that will return a list of TBAMatch 
 	"""
-	url = "http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches" + '?X-TBA-App-Id=frc8%3Ascouting%3Apre-alpha'
-	jsonvar = get_data(url)
+	route = "/event/" + eventKey + "/matches"
+	jsonvar = get_data(route)
 
 	return_val = []
 	for i in jsonvar:
@@ -14,10 +14,10 @@ def get_matches_with_teams(eventKey):
 
 	return return_val
 
-def get_data(url):
-	request = urllib2.Request(url, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'})
-	data = urllib2.urlopen(request).read().decode('utf-8')
-	jsonvar = json.loads(data)
+def get_data(route):
+	url = "http://www.thebluealliance.com/api/v2" + route
+	request = requests.get(url, headers={'X-TBA-App_Id': 'frc8:scouting:pre-alpha'})
+	jsonvar = request.json()
 
 	return jsonvar
 
