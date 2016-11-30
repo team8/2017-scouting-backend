@@ -68,6 +68,7 @@ def upload_data(auth):
 	except Exception:
 		return jsonify({"status": "errored"})
 
+
 # Start Flask
 if __name__ == '__main__':
 	fb.authenticate(firebase_secret)
