@@ -113,13 +113,17 @@ def calc_timd_stddev(event, team, stat):
 # Firebase test
 @app.route('/<string:auth>/fbtest/', methods=['GET'])
 def fbtest(auth):
+	from datetime import datetime
+	start = datetime.now()
 	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)
 	upload_timd_stat("2017cave" , "frc8", "qm", "2", "high_goals_scored", 200)
 	upload_timd_stat("2017cave" , "frc8", "qm", "3", "high_goals_scored", 300)
 	upload_timd_stat("2017cave" , "frc8", "qm", "4", "high_goals_scored", 400)
 	upload_team_stat("2017cave" , "frc8", "high_goals_scored_avg", calc_timd_average("2017cave" , "frc8", "high_goals_scored"))
 	upload_team_stat("2017cave" , "frc8", "high_goals_scored_sd", calc_timd_stddev("2017cave" , "frc8", "high_goals_scored"))
-	return str(calc_timd_average("2017cave", "frc8", "high_goals_scored")) + ", " + str(calc_timd_stddev("2017cave", "frc8", "high_goals_scored"))
+	retval = str(calc_timd_average("2017cave", "frc8", "high_goals_scored")) + ", " + str(calc_timd_stddev("2017cave", "frc8", "high_goals_scored"))
+	print (datetime.now() - start)
+	return retval
 
 # Start Flask
 if __name__ == '__main__':
