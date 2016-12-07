@@ -4,3 +4,9 @@ __pycache__/
 
 # Mac files
 *.DS_Store
+
+# Venv files
+venv/
+q/
+Python*/
+Python*.tgz
