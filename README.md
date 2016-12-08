@@ -13,6 +13,9 @@ where `<AUTH-FILE>` is a file with the authentication password on the first line
 In order to run the server, you need to install the following pip dependencies:
 
 ```
-sudo pip install flask
-sudo pip install python-firebase
+pip install flask
+pip install python-firebase
 ```
+# Python 2.7.9+
+
+You will need Python 2.7.9+ for `requests` to run properly. The Team 8 dev server runs Ubuntu 14.04, which does not support Python 2.7.7+. Use the link [here](http://mbless.de/blog/2016/01/09/upgrade-to-python-2711-on-ubuntu-1404-lts.html) to set up a virtual environment for running Python 2.7.11 on the dev server.
