@@ -1,0 +1,164 @@
+from flask import Flask, jsonify, request
+
+import sys
+import json
+import urllib2
+
+import firebase_interactor as fb
+import slack_interactor as slack
+import tba_interactor as tba
+
+# Constants
+comp_levels = ["f", "sf", "qf", "qm"]
+
+# Initialize Flask
+app = Flask(__name__)
+
+# Pass the auth file in as an argument
+auth_code = open(sys.argv[1]).readlines()[0].strip()
+firebase_secret = open(sys.argv[1]).readlines()[1].strip()
+
+# App routes
+@app.route('/<string:auth>/test/', methods=['GET'])
+def test(auth):
+	if auth == auth_code:
+		return jsonify({'connection':'success'})
+	else:
+		return jsonify({'connection':'failed'})
+
+@app.route('/<string:auth>/match/<string:event>')
+def match(auth, event):
+	if auth != auth_code:
+		return jsonify({'query':{'success' : 'no'}})
+
+	result = {'query' : {'success' : 'yes'}}
+	matches = tba.get_matches_with_teams(event)
+	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
+	return jsonify(result)
+
+
+@app.route('/<string:auth>/error')
+def error(auth):
+	issue = request.headers['issue']
+
+	status = slack.send_message("*ISSUE REPORTED*: " + issue)
+
+	if status == "ok":
+		return jsonify({"report": "success"})
+=======
+	issue = flask.request.headers['issue']
+
+	payload = {"channel":"#scouting-app","username":"Scouting Issue Bot","text":"*ISSUE REPORTED*: " + issue,"icon_emoji":":exclamation:"}
+	results = pyReq.post("https://hooks.slack.com/services/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", json.dumps(payload), headers={'content-type': 'application/json'})
+
+	print results.url
+	print results
+
+	print results.text
+
+	if results.text == "ok":
+		return jsonify({"report": "success"})
+	else:
+		return jsonify({"report": "failed"})
+
+# Initialize Firebase
+authentication = firebase.FirebaseAuthentication(firebase_secret, "scouting@palyrobotics.com", extra={"id": "server"})
+firebase = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
+
+# Firebase basics
+def get_team_matches(event, team, comp_level):
+	print "Getting " + str(comp_level) + " match keys for " + str(team)
+	matches = []
+	matches_raw = firebase.get(str(event) + "/teams/" + str(team)  + "/matches/" + comp_level, None)
+	if matches_raw != None:
+		try:
+			for match in matches_raw.keys():
+				matches.append(match)
+		except AttributeError:
+			for i in range(0, len(matches_raw)):
+				if matches_raw[i] != None:
+					matches.append(i)
+	else:
+		return None
+	return matches
+
+def upload_timd_stat(event, team, comp_level, match_number, stat, value):
+	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
+	firebase.put(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat, value)
+
+def get_timd_stat(event, team, comp_level, match_number, stat):
+	print "Getting TIMD stat: " + str(team) + "'s " + str(stat) + " in " + str(comp_level) + str(match_number)
+	return firebase.get(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat)
+
+def upload_team_stat(event, team, stat, value):
+	print "Uploading team stat: " + str(team) + " - " + str(stat) + ": " + str(value)
+	firebase.put(str(event) + "/teams/" + str(team) + "/stats/", stat, value)
+
+def get_team_stat(event, team, stat):
+	print "Getting team stat: " + str(team) + "'s " + str(stat)
+	return firebase.get(str(event) + "/teams/" + str(team) + "/stats/", stat)
+
+# Firebase calculations
+def calc_timd_average(event, team, stat):
+	print "Calculating TIMD average for " + str(team) + "'s " + str(stat)
+	num_matches = 0
+	stat_total = 0
+	for comp_level in comp_levels:
+		matches = get_team_matches(event, team, comp_level)
+		if matches != None:
+			for match in matches:
+				timd_stat = get_timd_stat(event, team, comp_level, match, stat)
+				if timd_stat != None:
+					stat_total += timd_stat
+				num_matches += 1
+	if num_matches != 0:
+		average = float(stat_total)/float(num_matches)
+	else:
+		average = 0
+	return average
+
+def calc_timd_stddev(event, team, stat):
+	print "Calculating TIMD standard deviation for " + str(team) + "'s " + str(stat)
+	average = calc_timd_average(event, team, stat)
+	num_matches = 0
+	stat_total = 0
+	for comp_level in comp_levels:
+		matches = get_team_matches(event, team, comp_level)
+		if matches != None:
+			matches = get_team_matches(event, team, comp_level)
+			for match in matches:
+				timd_stat = get_timd_stat(event, team, comp_level, match, stat)
+				if timd_stat != None:
+					stat_total += (timd_stat - average) ** 2
+				num_matches += 1
+	if num_matches != 0:
+		stddev = (float(stat_total)/float(num_matches)) ** 0.5
+>>>>>>> Errors that are reported will now get directed into our slack channel
+	else:
+		return jsonify({"report": "failed"})
+
+@app.route('/<string:auth>/upload_data'):
+def upload_data(auth):
+	data_elements = request.headers['data'] # Expects the header to be a JSON array
+	data = json.loads(data_elements)
+
+	try:
+		event = data["event"]
+		team = data["team"]
+		comp_level = data["comp_level"]
+		matchNumber = data["match_number"]
+
+		for k,v in data:
+			if k not in ["event", "team", "comp_leve", "match_number"]:
+				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, v)
+
+		return jsonify({"status": "success"})
+
+	except Exception:
+		return jsonify({"status": "errored"})
+
+
+# Start Flask
+if __name__ == '__main__':
+	fb.authenticate(firebase_secret)
+	app.run(host='0.0.0.0', debug=True)
