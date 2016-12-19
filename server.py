@@ -1,8 +1,17 @@
+import requests as pyReq
+
 from flask import Flask, jsonify
+
+import flask
+
 import sys
 import TBAconnection
 import firebase
+import json
 import firebasecustomauth
+import urllib2
+
+
 
 # Constants
 comp_levels = ["f", "sf", "qf", "qm"]
@@ -32,6 +41,23 @@ def match(auth, event):
 	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
 	return jsonify(result)
 
+
+@app.route('/<string:auth>/error')
+def error(auth):
+	issue = flask.request.headers['issue']
+
+	payload = {"channel":"#scouting-app","username":"Scouting Issue Bot","text":"*ISSUE REPORTED*: " + issue,"icon_emoji":":exclamation:"}
+	results = pyReq.post("https://hooks.slack.com/services/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", json.dumps(payload), headers={'content-type': 'application/json'})
+
+	print results.url
+	print results
+
+	print results.text
+
+	if results.text == "ok":
+		return jsonify({"report": "success"})
+	else:
+		return jsonify({"report": "failed"})
 
 # Initialize Firebase
 authentication = firebase.FirebaseAuthentication(firebase_secret, "scouting@palyrobotics.com", extra={"id": "server"})
