@@ -86,7 +86,7 @@ def calc_timd_stddev(event, team, stat):
 	else:
 		stddev = 0
 	return stddev
-		
+
 
 
 # Start Flask
