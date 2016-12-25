@@ -48,46 +48,25 @@ def error(auth):
 	else:
 		return jsonify({"report": "failed"})
 
-# Firebase calculations
-def calc_timd_average(event, team, stat):
-	print "Calculating TIMD average for " + str(team) + "'s " + str(stat)
-	num_matches = 0
-	stat_total = 0
-	for comp_level in comp_levels:
-		matches = get_team_matches(event, team, comp_level)
-		if matches != None:
-			for match in matches:
-				timd_stat = get_timd_stat(event, team, comp_level, match, stat)
-				if timd_stat != None:
-					stat_total += timd_stat
-				num_matches += 1
-	if num_matches != 0:
-		average = float(stat_total)/float(num_matches)
-	else:
-		average = 0
-	return average
+@app.route('/<string:auth>/upload_data')
+def upload_data(auth):
+	data_elements = request.headers['data'] # Expects the header to be a JSON array
+	data = json.loads(data_elements)
 
-def calc_timd_stddev(event, team, stat):
-	print "Calculating TIMD standard deviation for " + str(team) + "'s " + str(stat)
-	average = calc_timd_average(event, team, stat)
-	num_matches = 0
-	stat_total = 0
-	for comp_level in comp_levels:
-		matches = get_team_matches(event, team, comp_level)
-		if matches != None:
-			matches = get_team_matches(event, team, comp_level)
-			for match in matches:
-				timd_stat = get_timd_stat(event, team, comp_level, match, stat)
-				if timd_stat != None:
-					stat_total += (timd_stat - average) ** 2
-				num_matches += 1
-	if num_matches != 0:
-		stddev = (float(stat_total)/float(num_matches)) ** 0.5
-	else:
-		stddev = 0
-	return stddev
+	try:
+		event = data["event"]
+		team = data["team"]
+		comp_level = data["comp_level"]
+		matchNumber = data["match_number"]
 
+		for k,v in data:
+			if k not in ["event", "team", "comp_leve", "match_number"]:
+				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, v)
 
+		return jsonify({"status": "success"})
+
+	except Exception:
+		return jsonify({"status": "errored"})
 
 # Start Flask
 if __name__ == '__main__':
