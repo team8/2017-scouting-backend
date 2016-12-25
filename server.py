@@ -40,7 +40,6 @@ def match(auth, event):
 @app.route('/<string:auth>/error')
 def error(auth):
 	issue = request.headers['issue']
-
 	status = slack.send_message("*ISSUE REPORTED*: " + issue)
 
 	if status == "ok":
@@ -67,7 +66,6 @@ def upload_data(auth):
 
 	except Exception:
 		return jsonify({"status": "errored"})
-
 
 # Start Flask
 if __name__ == '__main__':
