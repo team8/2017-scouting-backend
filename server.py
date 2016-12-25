@@ -47,7 +47,7 @@ def error(auth):
 	else:
 		return jsonify({"report": "failed"})
 
-@app.route('/<string:auth>/upload_data'):
+@app.route('/<string:auth>/upload_data')
 def upload_data(auth):
 	data_elements = request.headers['data'] # Expects the header to be a JSON array
 	data = json.loads(data_elements)
@@ -57,13 +57,12 @@ def upload_data(auth):
 		team = data["team"]
 		comp_level = data["comp_level"]
 		matchNumber = data["match_number"]
-
 		for k,v in data:
 			if k not in ["event", "team", "comp_leve", "match_number"]:
 				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, v)
 
 		return jsonify({"status": "success"})
-	except Exception:
+        except Exception:
 		return jsonify({"status": "errored"})
 
 # Start Flask
