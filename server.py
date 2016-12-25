@@ -1,17 +1,12 @@
-import requests as pyReq
-
-from flask import Flask, jsonify
-
-import flask
+from flask import Flask, jsonify, request
 
 import sys
-import TBAconnection
-import firebase
 import json
-import firebasecustomauth
 import urllib2
 
-
+import firebase_interactor as fb
+import slack_interactor as slack
+import tba_interactor as tba
 
 # Constants
 comp_levels = ["f", "sf", "qf", "qm"]
@@ -37,64 +32,21 @@ def match(auth, event):
 		return jsonify({'query':{'success' : 'no'}})
 
 	result = {'query' : {'success' : 'yes'}}
-	matches = TBAconnection.get_matches_with_teams(event)
+	matches = tba.get_matches_with_teams(event)
 	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
 	return jsonify(result)
 
 
 @app.route('/<string:auth>/error')
 def error(auth):
-	issue = flask.request.headers['issue']
+	issue = request.headers['issue']
 
-	payload = {"channel":"#scouting-app","username":"Scouting Issue Bot","text":"*ISSUE REPORTED*: " + issue,"icon_emoji":":exclamation:"}
-	results = pyReq.post("https://hooks.slack.com/services/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", json.dumps(payload), headers={'content-type': 'application/json'})
+	status = slack.send_message("*ISSUE REPORTED*: " + issue)
 
-	print results.url
-	print results
-
-	print results.text
-
-	if results.text == "ok":
+	if status == "ok":
 		return jsonify({"report": "success"})
 	else:
 		return jsonify({"report": "failed"})
-
-# Initialize Firebase
-authentication = firebase.FirebaseAuthentication(firebase_secret, "scouting@palyrobotics.com", extra={"id": "server"})
-firebase = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
-
-# Firebase basics
-def get_team_matches(event, team, comp_level):
-	print "Getting " + str(comp_level) + " match keys for " + str(team)
-	matches = []
-	matches_raw = firebase.get(str(event) + "/teams/" + str(team)  + "/matches/" + comp_level, None)
-	if matches_raw != None:
-		try:
-			for match in matches_raw.keys():
-				matches.append(match)
-		except AttributeError:
-			for i in range(0, len(matches_raw)):
-				if matches_raw[i] != None:
-					matches.append(i)
-	else:
-		return None
-	return matches
-
-def upload_timd_stat(event, team, comp_level, match_number, stat, value):
-	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
-	firebase.put(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat, value)
-
-def get_timd_stat(event, team, comp_level, match_number, stat):
-	print "Getting TIMD stat: " + str(team) + "'s " + str(stat) + " in " + str(comp_level) + str(match_number)
-	return firebase.get(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat)
-
-def upload_team_stat(event, team, stat, value):
-	print "Uploading team stat: " + str(team) + " - " + str(stat) + ": " + str(value)
-	firebase.put(str(event) + "/teams/" + str(team) + "/stats/", stat, value)
-
-def get_team_stat(event, team, stat):
-	print "Getting team stat: " + str(team) + "'s " + str(stat)
-	return firebase.get(str(event) + "/teams/" + str(team) + "/stats/", stat)
 
 # Firebase calculations
 def calc_timd_average(event, team, stat):
@@ -136,21 +88,8 @@ def calc_timd_stddev(event, team, stat):
 	return stddev
 		
 
-# Firebase test
-@app.route('/<string:auth>/fbtest/', methods=['GET'])
-def fbtest(auth):
-	from datetime import datetime
-	start = datetime.now()
-	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)
-	upload_timd_stat("2017cave" , "frc8", "qm", "2", "high_goals_scored", 200)
-	upload_timd_stat("2017cave" , "frc8", "qm", "3", "high_goals_scored", 300)
-	upload_timd_stat("2017cave" , "frc8", "qm", "4", "high_goals_scored", 400)
-	upload_team_stat("2017cave" , "frc8", "high_goals_scored_avg", calc_timd_average("2017cave" , "frc8", "high_goals_scored"))
-	upload_team_stat("2017cave" , "frc8", "high_goals_scored_sd", calc_timd_stddev("2017cave" , "frc8", "high_goals_scored"))
-	retval = str(calc_timd_average("2017cave", "frc8", "high_goals_scored")) + ", " + str(calc_timd_stddev("2017cave", "frc8", "high_goals_scored"))
-	print (datetime.now() - start)
-	return retval
 
 # Start Flask
 if __name__ == '__main__':
+	fb.authenticate(firebase_secret)
 	app.run(host='0.0.0.0', debug=True)
