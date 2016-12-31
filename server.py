@@ -1,12 +1,30 @@
 from flask import Flask, jsonify, request
 
 import sys
+import traceback
 import json
 import urllib2
 
 import firebase_interactor as fb
 import slack_interactor as slack
 import tba_interactor as tba
+
+from subprocess import call
+
+"""
+Used to catch Python exceptions.  This doesn't catch Flask exceptions because of
+http://bugs.python.org/issue1230540.
+"""
+def exception_handling(exctype, val, data):
+	# Log it
+	print "Encountered a Python-Based (non-Flask) error {}.  Value: {}.  Full Traceback: {}".format(exctype, val, data)
+	# Send us a slack notification
+	slack.send_message("Encountered an exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(exctype, val, data))
+
+	call(["python"] + sys.argv) # restart
+
+# This is used to catch Python system based exceptions (not involving Flask).
+sys.excepthook = exception_handling
 
 # Constants
 comp_levels = ["f", "sf", "qf", "qm"]
@@ -64,6 +82,16 @@ def upload_data(auth):
 		return jsonify({"status": "success"})
         except Exception:
 		return jsonify({"status": "errored"})
+
+
+@app.errorhandler(Exception)
+def handle_error(e):
+	data = traceback.format_exc()
+	print "Encountered a Flask-Based error {}.  Value: {}.  Full Traceback: {}".format(type(e).__name__, str(e), data)
+	
+	slack.send_message("Encountered a flask exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(type(e).__name__, str(e), data))
+
+	return jsonify({"status": "error"})
 
 # Start Flask
 if __name__ == '__main__':
