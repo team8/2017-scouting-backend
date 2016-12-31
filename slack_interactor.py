@@ -1,4 +1,5 @@
 import requests
+import json
 
 def send_message(data, channel="#scouting-app", icon=":exclamation:", name="Scouting Issue Bot"):
 	payload = {"channel": channel, "username": name,"text": data, "icon_emoji": icon}
