@@ -1,8 +1,30 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+
 import sys
-import TBAconnection
-import firebase
-import firebasecustomauth
+import traceback
+import json
+import urllib2
+
+import firebase_interactor as fb
+import slack_interactor as slack
+import tba_interactor as tba
+
+from subprocess import call
+
+"""
+Used to catch Python exceptions.  This doesn't catch Flask exceptions because of
+http://bugs.python.org/issue1230540.
+"""
+def exception_handling(exctype, val, data):
+	# Log it
+	print "Encountered a Python-Based (non-Flask) error {}.  Value: {}.  Full Traceback: {}".format(exctype, val, data)
+	# Send us a slack notification
+	slack.send_message("Encountered an exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(exctype, val, data))
+
+	call(["python"] + sys.argv) # restart
+
+# This is used to catch Python system based exceptions (not involving Flask).
+sys.excepthook = exception_handling
 
 # Constants
 comp_levels = ["f", "sf", "qf", "qm"]
@@ -28,99 +50,53 @@ def match(auth, event):
 		return jsonify({'query':{'success' : 'no'}})
 
 	result = {'query' : {'success' : 'yes'}}
-	matches = TBAconnection.get_matches_with_teams(event)
+	matches = tba.get_matches_with_teams(event)
 	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
 	return jsonify(result)
 
 
-# Initialize Firebase
-authentication = firebase.FirebaseAuthentication(firebase_secret, "scouting@palyrobotics.com", extra={"id": "server"})
-firebase = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
+@app.route('/<string:auth>/error')
+def error(auth):
+	issue = request.headers['issue']
 
-# Firebase basics
-def get_team_matches(event, team, comp_level):
-	print "Getting " + str(comp_level) + " match keys for " + str(team)
-	matches = []
-	matches_raw = firebase.get(str(event) + "/teams/" + str(team)  + "/matches/" + comp_level, None)
-	if matches_raw != None:
-		try:
-			for match in matches_raw.keys():
-				matches.append(match)
-		except AttributeError:
-			for i in range(0, len(matches_raw)):
-				if matches_raw[i] != None:
-					matches.append(i)
+	status = slack.send_message("*ISSUE REPORTED*: " + issue)
+
+	if status == "ok":
+		return jsonify({"report": "success"})
 	else:
-		return None
-	return matches
+		return jsonify({"report": "failed"})
 
-def upload_timd_stat(event, team, comp_level, match_number, stat, value):
-	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
-	firebase.put(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat, value)
+@app.route('/<string:auth>/upload_data')
+def upload_data(auth):
+	data_elements = request.headers['data'] # Expects the header to be a JSON array
+	data = json.loads(data_elements)
 
-def get_timd_stat(event, team, comp_level, match_number, stat):
-	print "Getting TIMD stat: " + str(team) + "'s " + str(stat) + " in " + str(comp_level) + str(match_number)
-	return firebase.get(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat)
+	try:
+		event = data["event"]
+		team = data["team"]
+		comp_level = data["comp_level"]
+		matchNumber = data["match_number"]
 
-def upload_team_stat(event, team, stat, value):
-	print "Uploading team stat: " + str(team) + " - " + str(stat) + ": " + str(value)
-	firebase.put(str(event) + "/teams/" + str(team) + "/stats/", stat, value)
+		for k,v in data:
+			if k not in ["event", "team", "comp_leve", "match_number"]:
+				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, v)
 
-def get_team_stat(event, team, stat):
-	print "Getting team stat: " + str(team) + "'s " + str(stat)
-	return firebase.get(str(event) + "/teams/" + str(team) + "/stats/", stat)
+		return jsonify({"status": "success"})
 
-# Firebase calculations
-def calc_timd_average(event, team, stat):
-	print "Calculating TIMD average for " + str(team) + "'s " + str(stat)
-	num_matches = 0
-	stat_total = 0
-	for comp_level in comp_levels:
-		matches = get_team_matches(event, team, comp_level)
-		if matches != None:
-			for match in matches:
-				timd_stat = get_timd_stat(event, team, comp_level, match, stat)
-				if timd_stat != None:
-					stat_total += timd_stat
-				num_matches += 1
-	if num_matches != 0:
-		average = float(stat_total)/float(num_matches)
-	else:
-		average = 0
-	return average
+	except Exception:
+		return jsonify({"status": "errored"})
 
-def calc_timd_stddev(event, team, stat):
-	print "Calculating TIMD standard deviation for " + str(team) + "'s " + str(stat)
-	average = calc_timd_average(event, team, stat)
-	num_matches = 0
-	stat_total = 0
-	for comp_level in comp_levels:
-		matches = get_team_matches(event, team, comp_level)
-		if matches != None:
-			matches = get_team_matches(event, team, comp_level)
-			for match in matches:
-				timd_stat = get_timd_stat(event, team, comp_level, match, stat)
-				if timd_stat != None:
-					stat_total += (timd_stat - average) ** 2
-				num_matches += 1
-	if num_matches != 0:
-		stddev = (float(stat_total)/float(num_matches)) ** 0.5
-	else:
-		stddev = 0
-	return stddev
-		
 
-# Firebase test
-@app.route('/<string:auth>/fbtest/', methods=['GET'])
-def fbtest(auth):
-	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)
-	upload_timd_stat("2017cave" , "frc8", "qm", "2", "high_goals_scored", 200)
-	upload_timd_stat("2017cave" , "frc8", "qm", "3", "high_goals_scored", 300)
-	upload_timd_stat("2017cave" , "frc8", "qm", "4", "high_goals_scored", 400)
-	upload_team_stat("2017cave" , "frc8", "high_goals_scored_avg", calc_timd_average("2017cave" , "frc8", "high_goals_scored"))
-	upload_team_stat("2017cave" , "frc8", "high_goals_scored_sd", calc_timd_stddev("2017cave" , "frc8", "high_goals_scored"))
-	return str(calc_timd_average("2017cave", "frc8", "high_goals_scored")) + ", " + str(calc_timd_stddev("2017cave", "frc8", "high_goals_scored"))
+@app.errorhandler(Exception)
+def handle_error(e):
+	data = traceback.format_exc()
+	print "Encountered a Flask-Based error {}.  Value: {}.  Full Traceback: {}".format(type(e).__name__, str(e), data)
+	
+	slack.send_message("Encountered a flask exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(type(e).__name__, str(e), data))
+
+	return jsonify({"status": "error"})
 
 # Start Flask
 if __name__ == '__main__':
+	fb.authenticate(firebase_secret)
 	app.run(host='0.0.0.0', debug=True)
