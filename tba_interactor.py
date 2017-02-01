@@ -14,6 +14,16 @@ def get_matches_with_teams(eventKey):
 
 	return return_val
 
+def get_teams(eventKey):
+        route = "/event/" + eventKey + "/teams"
+        jsonvar = get_data(route)
+
+        return_val = []
+        for i in jsonvar:
+                return_val.append(i["team_number"])
+        
+        return return_val
+
 def get_data(route):
 	url = "http://www.thebluealliance.com/api/v2" + route
 	request = requests.get(url, headers={'X-TBA-App_Id': 'frc8:scouting:pre-alpha'})

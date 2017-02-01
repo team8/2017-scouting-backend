@@ -54,6 +54,15 @@ def match(auth, event):
 	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
 	return jsonify(result)
 
+@app.route('/<string:auth>/teams/<string:event>')
+def teams(auth, event):
+	if auth != auth_code:
+		return jsonify({'query':{'success' : 'no'}})
+
+	result = {'query' : {'success' : 'yes'}}
+	teams = tba.get_teams(event)
+	result['query']['teams'] = {i : {"team_number" : i} for i in teams}
+        return jsonify(result)
 
 @app.route('/<string:auth>/error')
 def error(auth):
