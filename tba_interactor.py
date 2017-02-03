@@ -34,7 +34,7 @@ def get_data(route):
 class Alliance:
 	def __init__(self, team1, team2, team3):
 		self.teams = [team1, team2, team3]
-		self.teams = [a.encode('ascii','ignore') for a in self.teams]
+#		self.teams = [a.encode('ascii','ignore') for a in self.teams]
 
 	def get_teams(self):
 		return self.teams
@@ -45,9 +45,9 @@ class TBAMatch(object):
 		self.comp_level = match_dict["comp_level"]
 		self.match_number = match_dict["match_number"]
 		self.key = match_dict["key"]
-		self.blue_alliance = Alliance(match_dict["alliances"]["blue"]["teams"][0], 
-									  match_dict["alliances"]["blue"]["teams"][1], 
-									  match_dict["alliances"]["blue"]["teams"][2])
-		self.red_alliance = Alliance(match_dict["alliances"]["red"]["teams"][0], 
-									  match_dict["alliances"]["red"]["teams"][1], 
-									  match_dict["alliances"]["red"]["teams"][2])
+		self.blue_alliance = Alliance(int(match_dict["alliances"]["blue"]["teams"][0][3:]), 
+									  int(match_dict["alliances"]["blue"]["teams"][1][3:]), 
+									  int(match_dict["alliances"]["blue"]["teams"][2][3:]))
+		self.red_alliance = Alliance(int(match_dict["alliances"]["red"]["teams"][0][3:]), 
+									  int(match_dict["alliances"]["red"]["teams"][1][3:]), 
+									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
