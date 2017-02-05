@@ -51,7 +51,7 @@ def match(auth, event):
 
 	result = {'query' : {'success' : 'yes'}}
 	matches = tba.get_matches_with_teams(event)
-	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams} for i in matches}
+	result['query']['matches'] = {i.key : {"blue" : i.blue_alliance.teams, "red" : i.red_alliance.teams, "score_breakdown" : i.score_breakdown} for i in matches}
 	return jsonify(result)
 
 @app.route('/<string:auth>/teams/<string:event>')
