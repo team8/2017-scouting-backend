@@ -85,7 +85,7 @@ def upload_data(auth):
 		comp_level = data["comp_level"]
 		matchNumber = data["match_number"]
 		for k,v in data:
-			if k not in ["event", "team", "comp_leve", "match_number"]:
+			if k not in ["event", "team", "comp_level", "match_number"]:
 				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, v)
 
 		return jsonify({"status": "success"})
