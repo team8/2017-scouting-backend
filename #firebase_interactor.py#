@@ -6,9 +6,7 @@ fb = None
 
 def authenticate(fb_auth_token):
 	authentication = firebase.FirebaseAuthentication(fb_auth_token, "scouting@palyrobotics.com", extra={"id": "server"})
-        global fb
-	fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
-	
+a	fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
 
 def fbtest():
 	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)

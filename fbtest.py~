@@ -6,10 +6,9 @@ fb = None
 
 def authenticate(fb_auth_token):
 	authentication = firebase.FirebaseAuthentication(fb_auth_token, "scouting@palyrobotics.com", extra={"id": "server"})
-        global fb
-	fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
-	
-
+#	fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
+	global fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=None)
+                
 def fbtest():
 	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)
 	upload_timd_stat("2017cave" , "frc8", "qm", "2", "high_goals_scored", 200)
@@ -52,3 +51,6 @@ def get_team_matches(event, team, comp_level):
 	else:
 		return None
 	return matches
+
+authenticate("vOeDTTJx9eX6S8G29bgq3BJPvogEdmW6KbMDssPK")
+print get_team_stat("2016casj", 8, "not improtant")
