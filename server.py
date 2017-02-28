@@ -76,20 +76,25 @@ def error(auth):
 
 @app.route('/<string:auth>/upload_data')
 def upload_data(auth):
-	data_elements = request.headers['data'] # Expects the header to be a JSON array
-	data = json.loads(data_elements)
+	data_elements = request.headers # Expects the header to be a JSON arrays
+	data = data_elements.to_list()
 
+	data = {i[0]:i[1] for i in data}
+	print data
 	try:
-		event = data["event"]
-		team = data["team"]
-		comp_level = data["comp_level"]
-		matchNumber = data["match_number"]
-		for k,v in data:
-			if k not in ["event", "team", "comp_level", "match_number"]:
-				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, v)
+		# event = data["event"]
+		event = "2017cave"
+		team = data["Team"]
+		comp_level = data["Comp-Level"]
+		matchNumber = data["Match"]
+		for k in data.keys():
+			if k not in ["Event", "Team", "Comp-Level", "Match", "Accept-Encoding", "User-Agent"]:
+				print k
+				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, data[k])
 
 		return jsonify({"status": "success"})
-        except Exception:
+	except Exception, e:
+		raise e
 		return jsonify({"status": "errored"})
 
 
