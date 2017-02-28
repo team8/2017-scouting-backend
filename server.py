@@ -17,9 +17,9 @@ http://bugs.python.org/issue1230540.
 """
 def exception_handling(exctype, val, data):
 	# Log it
-	print "Encountered a Python-Based (non-Flask) error {}.  Value: {}.  Full Traceback: {}".format(exctype, val, data)
+	print "Encountered a Python-Based (non-Flask) error {}.  Value: {}.  Full Traceback: {}".format(exctype, val, data.format_exc())
 	# Send us a slack notification
-	slack.send_message("Encountered an exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(exctype, val, data))
+	slack.send_message("Encountered an exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(exctype, val, data.format_exc()))
 
 	call(["python"] + sys.argv) # restart
 
