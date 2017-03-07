@@ -88,7 +88,7 @@ def upload_data(auth):
 		comp_level = data["Comp-Level"]
 		matchNumber = data["Match"]
 		for k in data.keys():
-			if k not in ["Event", "Team", "Comp-Level", "Match", "Accept-Encoding", "User-Agent"]:
+			if k not in ["Event", "Team", "Comp-Level", "Match"] + ["Accept-Encoding", "User-Agent", "Accept-Language", "Accept", "Connection", "Host"]:
 				print k
 				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, data[k])
 
