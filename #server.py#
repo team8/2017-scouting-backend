@@ -96,7 +96,7 @@ def upload_data(auth):
 		return jsonify({"status": "success"})
 	except Exception, e:
 		raise e
-		return jsonify({"status": "errored"})
+import firebase_interactor as fbify({"status": "errored"})
 
 
 @app.errorhandler(Exception)

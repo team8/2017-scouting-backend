@@ -10,7 +10,12 @@ def authenticate(fb_auth_token):
 	global fb
 	fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
 	
+def put(url, key, value):
+        fb.put(url, key, value)
 
+def get(url, key):
+        return fb.get(url, key)
+        
 def fbtest():
 	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)
 	upload_timd_stat("2017cave" , "frc8", "qm", "2", "high_goals_scored", 200)
@@ -23,19 +28,19 @@ def fbtest():
 
 def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
-	fb.put(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat, value)
+	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
 
 def get_timd_stat(event, team, comp_level, match_number, stat):
 	print "Getting TIMD stat: " + str(team) + "'s " + str(stat) + " in " + str(comp_level) + str(match_number)
-	return fb.get(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat)
+	return fb.get(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat)
 
 def upload_team_stat(event, team, stat, value):
 	print "Uploading team stat: " + str(team) + " - " + str(stat) + ": " + str(value)
-	fb.put(str(event) + "/teams/" + str(team) + "/stats/", stat, value)
+	fb.put(str(event) + "/teams/" + str(team) + "/data/", stat, value)
 
 def get_team_stat(event, team, stat):
 	print "Getting team stat: " + str(team) + "'s " + str(stat)
-	return fb.get(str(event) + "/teams/" + str(team) + "/stats/", stat)
+	return fb.get(str(event) + "/teams/" + str(team) + "/data/", stat)
 
 def get_match_stats(event, comp_level, match_number):
 	"""
