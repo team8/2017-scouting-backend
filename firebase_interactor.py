@@ -1,6 +1,8 @@
+from __future__ import division
 import firebase
 import firebasecustomauth
 import collections
+
 
 # Initialize Firebase
 fb = None
@@ -12,19 +14,6 @@ def authenticate(fb_auth_token):
 	
 def put(url, key, value):
         fb.put(url, key, value)
-
-def get(url, key):
-        return fb.get(url, key)
-        
-def fbtest():
-	upload_timd_stat("2017cave" , "frc8", "qm", "1", "high_goals_scored", 100)
-	upload_timd_stat("2017cave" , "frc8", "qm", "2", "high_goals_scored", 200)
-	upload_timd_stat("2017cave" , "frc8", "qm", "3", "high_goals_scored", 300)
-	upload_timd_stat("2017cave" , "frc8", "qm", "4", "high_goals_scored", 400)
-	upload_team_stat("2017cave" , "frc8", "high_goals_scored_avg", calc_timd_average("2017cave" , "frc8", "high_goals_scored"))
-	upload_team_stat("2017cave" , "frc8", "high_goals_scored_sd", calc_timd_stddev("2017cave" , "frc8", "high_goals_scored"))
-	return str(calc_timd_average("2017cave", "frc8", "high_goals_scored")) + ", " + str(calc_timd_stddev("2017cave", "frc8", "high_goals_scored"))
-
 
 def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
@@ -94,3 +83,42 @@ def parse_firebase_unicode(data):
     else:
         return data
 
+def end_of_match(event, team):
+
+	data = parse_firebase_unicode(fb.get(event + "/teams/" + team, None))
+	real_data = data["matches"]["qm"]
+
+	for i in ["Auto-Baseline","Auto-Fuel-High-Cycles","Auto-Fuel-Intake-Hopper","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake","End-Gear-Ground-Intake-Rating","End-No-Show","End-Takeoff","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-High-Cycles-In-Key","Tele-Fuel-High-Cycles-Out-Of-Key","Tele-Fuel-Intake-Hopper","Tele-Fuel-Intake-Loading-Station","Tele-Fuel-Low-Cycles","Tele-Fuel-Low-Cycles-Times","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station","Tele-Gears-Position-Boiler","Tele-Gears-Position-Loading","Tele-Gears-Position-Middle","Tele-Robot-Broke-Down","Tele-Robot-No-Action"]:
+		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
+
+	for i in ["Tele-Fuel-High-Cycles-Times", "Tele-Gears-Cycles-Times"]:
+		upload_team_stat(event, team, i+"-Average", get_stat_average_cycle_time(event, team, i, real_data))
+
+
+def get_stat_average_per_match(event, team, stat, real_data):
+
+	total = 0
+	num = 0
+
+	for i in real_data.keys():
+
+		if real_data[i][stat] == "" or real_data[i][stat] == "-1":
+			continue
+
+		total += float(real_data[i][stat])
+		num += 1
+
+	return total/num if num != 0 else 0
+
+def get_stat_average_cycle_time(event, team, stat, real_data):
+
+	total = 0
+	num = 0
+
+	for i in real_data.keys():
+		collected = [k for k in real_data[i][stat].split(";")[:-1] if k!= ""]
+		total += sum([float(k) for k in collected])
+		num+=len(collected)
+
+
+	return total/num if num != 0 else 0
