@@ -98,6 +98,30 @@ def upload_data(auth):
 		raise e
 		return jsonify({"status": "errored"})
 
+@app.route('/<string:auth>/upload_pit_data')
+def upload_pit_data(auth):
+	data_elements = request.headers # Expects the header to be a JSON arrays
+	data = data_elements.to_list()
+
+	data = {i[0]:i[1] for i in data}
+	print data
+	try:
+		event = data["Event"]
+		#event = "2017cave"
+		team = data["Team-Number"]
+		#comp_level = data["Comp-Level"]
+		#matchNumber = data["Match-Number"]
+                #matchIn = data["Match-In"]
+		for k in data.keys():
+			if k not in ["Event", "Team-Number", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
+				print k
+				fb.upload_pit_stat(event, team, k, data[k])
+
+		return jsonify({"status": "success"})
+	except Exception, e:
+		raise e
+		return jsonify({"status": "errored"})
+
 
 @app.errorhandler(Exception)
 def handle_error(e):
