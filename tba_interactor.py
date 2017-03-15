@@ -31,7 +31,8 @@ def get_rankings(eventKey):
         return_val = {}
         for i in jsonvar:
                 if i[0] != "Rank":
-                        return_val[i[1]] = {"ranking": i[0], "rankingInfo": "Ranking Score: " + str(i[2]) + " - " + str(i[8]) + " (W-L-T)"}
+                        rp = i[2] * i[9]
+                        return_val[i[1]] = {"ranking": i[0], "rankingInfo": "RP: " + str(int(round(rp))) + " | " + str(i[8]) + " (W-L-T) | Played: " + str(i[9])}
         
         return return_val
 
@@ -64,4 +65,4 @@ class TBAMatch(object):
 		self.red_alliance = Alliance(int(match_dict["alliances"]["red"]["teams"][0][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][1][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
-                self.score_breakdown = match_dict["score_breakdown"]
+                self.score_breakdown = match_dict.get("score_breakdown")
