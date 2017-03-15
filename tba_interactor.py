@@ -1,5 +1,7 @@
 import requests
 import json
+from collections import defaultdict
+import collections
 
 def get_matches_with_teams(eventKey):
 	"""
@@ -17,7 +19,6 @@ def get_matches_with_teams(eventKey):
 def get_teams(eventKey):
         route = "/event/" + eventKey + "/teams"
         jsonvar = get_data(route)
-
         return_val = []
         for i in jsonvar:
                 return_val.append(i["team_number"])
@@ -39,8 +40,8 @@ def get_rankings(eventKey):
 
 
 def get_data(route):
-	url = "http://www.thebluealliance.com/api/v2" + route
-	request = requests.get(url, headers={'X-TBA-App_Id': 'frc8:scouting:pre-alpha'})
+	url = "https://www.thebluealliance.com/api/v2" + route
+	request = requests.get(url, headers={'X-TBA-App_Id': 'frc8:scouting:pre-alpha'}, verify=False)
 	jsonvar = request.json()
 
 	return jsonvar
@@ -66,3 +67,54 @@ class TBAMatch(object):
 									  int(match_dict["alliances"]["red"]["teams"][1][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
                 self.score_breakdown = match_dict.get("score_breakdown")
+
+class TBAQualRanking(object):
+	def __init__(self, qual_ranking_array):
+		self.qual_ranking_array = qual_ranking_array
+		self.data = defaultdict(dict)
+
+		for team in qual_ranking_array[1:]:
+			for position in range(len(team)):
+				self.data[str(team[1])][qual_ranking_array[0][position]] = team[position]
+
+		self.data = dict(self.data)
+
+	def get_ranking(self, team):
+		return self.data[team]["Rank"]
+
+	def get_record(self, team):
+		return self.data[team]["Record (W-L-T)"]
+
+	def get_total_rp(self, team):
+		return float(self.data[team]["Played"]) * float(self.data[team]["Ranking Score"])
+
+	def get_num_matches(self, team):
+		return float(self.data[team]["Played"])
+
+def get_event_ranking(eventid):
+	"""
+	Method that will 
+	return ranking data for an event
+	"""
+	route = "/event/" + eventid + "/rankings"
+	data = get_data(route)
+
+	return TBAQualRanking(data)
+
+def parse_unicode(data):
+    if isinstance(data, basestring):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(parse_unicode, data.iteritems()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(parse_unicode, data))
+    else:
+        return data
+
+def get_opr(eventid, team):
+	route = "/event/" + eventid + "/stats"
+	data = get_data(route)
+	data = parse_unicode(data)
+
+
+	return data["oprs"][team]

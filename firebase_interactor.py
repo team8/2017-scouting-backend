@@ -52,8 +52,6 @@ def get_match_stats(event, comp_level, match_number):
 	match_stats = parse_firebase_unicode(match_stats)
 	
 	for team in match_stats.keys():
-		print "TEAM" 
-		print team
 		if match_stats[team].has_key("matches"):
 			if match_stats[team]["matches"].has_key(comp_level):
 				if match_stats[team]["matches"][comp_level].has_key(match_number):
@@ -65,7 +63,7 @@ def get_match_stats(event, comp_level, match_number):
 
 # Firebase basics
 def get_team_matches(event, team, comp_level):
-	print "Getting " + str(comp_level) + " match keys for " + str(team)
+	# print "Getting " + str(comp_level) + " match keys for " + str(team)
 	matches = []
 	matches_raw = fb.get(str(event) + "/teams/" + str(team)  + "/matches/" + comp_level, None)
 	if matches_raw != None:
