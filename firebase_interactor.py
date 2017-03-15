@@ -22,6 +22,11 @@ def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
 	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
 
+	if stat=="end_notes":
+		# The last stat
+		end_of_match(event, team)
+
+
 def upload_pit_stat(event, team, stat, value):
 	print "Uploading pit scouting stat: " + str(team) + " - " + str(stat) + ": " + str(value)
 	fb.put(str(event) + "/teams/" + str(team) + "/pit", stat, value)
