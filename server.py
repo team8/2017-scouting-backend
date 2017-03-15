@@ -61,7 +61,11 @@ def teams(auth, event):
 
 	result = {'query' : {'success' : 'yes'}}
 	teams = tba.get_teams(event)
-	result['query']['teams'] = {i : {"team_number" : i} for i in teams}
+        rankings = tba.get_rankings(event)
+        if rankings != {}:
+                result['query']['teams'] = {i : {"team_number" : i, "ranking": rankings[i]["ranking"], "rankingInfo": rankings[i]["rankingInfo"]} for i in teams}
+        else:
+                result['query']['teams'] = {i : {"team_number" : i} for i in teams}
         return jsonify(result)
 
 @app.route('/<string:auth>/error')
@@ -82,15 +86,40 @@ def upload_data(auth):
 	data = {i[0]:i[1] for i in data}
 	print data
 	try:
-		# event = data["event"]
-		event = "2017cave"
-		team = data["Team"]
+		event = data["Event"]
+		#event = "2017cave"
+		team = data["Team-Number"]
 		comp_level = data["Comp-Level"]
-		matchNumber = data["Match"]
+		matchNumber = data["Match-Number"]
+                matchIn = data["Match-In"]
 		for k in data.keys():
-			if k not in ["Event", "Team", "Comp-Level", "Match"] + ["Accept-Encoding", "User-Agent", "Accept-Language", "Accept", "Connection", "Host"]:
+			if k not in ["Event", "Team-Number", "Comp-Level", "Match-Number", "Match-In", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
 				print k
 				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, data[k])
+
+		return jsonify({"status": "success"})
+	except Exception, e:
+		raise e
+		return jsonify({"status": "errored"})
+
+@app.route('/<string:auth>/upload_pit_data')
+def upload_pit_data(auth):
+	data_elements = request.headers # Expects the header to be a JSON arrays
+	data = data_elements.to_list()
+
+	data = {i[0]:i[1] for i in data}
+	print data
+	try:
+		event = data["Event"]
+		#event = "2017cave"
+		team = data["Team-Number"]
+		#comp_level = data["Comp-Level"]
+		#matchNumber = data["Match-Number"]
+                #matchIn = data["Match-In"]
+		for k in data.keys():
+			if k not in ["Event", "Team-Number", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
+				print k
+				fb.upload_pit_stat(event, team, k, data[k])
 
 		return jsonify({"status": "success"})
 	except Exception, e:

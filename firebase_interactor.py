@@ -12,22 +12,31 @@ def authenticate(fb_auth_token):
 	global fb
 	fb = firebase.FirebaseApplication("https://scouting-2017.firebaseio.com/", authentication=authentication)
 	
+def put(url, key, value):
+        fb.put(url, key, value)
+
+def get(url, key):
+        return fb.get(url, key)
 
 def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
-	fb.put(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat, value)
+	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
+
+def upload_pit_stat(event, team, stat, value):
+	print "Uploading pit scouting stat: " + str(team) + " - " + str(stat) + ": " + str(value)
+	fb.put(str(event) + "/teams/" + str(team) + "/pit", stat, value)
 
 def get_timd_stat(event, team, comp_level, match_number, stat):
 	print "Getting TIMD stat: " + str(team) + "'s " + str(stat) + " in " + str(comp_level) + str(match_number)
-	return fb.get(str(event) + "/teams/" + str(team) + "/matches/" + str(comp_level) + "/" + str(match_number), stat)
+	return fb.get(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat)
 
 def upload_team_stat(event, team, stat, value):
 	print "Uploading team stat: " + str(team) + " - " + str(stat) + ": " + str(value)
-	fb.put(str(event) + "/teams/" + str(team) + "/stats/", stat, value)
+	fb.put(str(event) + "/teams/" + str(team) + "/data/", stat, value)
 
 def get_team_stat(event, team, stat):
 	print "Getting team stat: " + str(team) + "'s " + str(stat)
-	return fb.get(str(event) + "/teams/" + str(team) + "/stats/", stat)
+	return fb.get(str(event) + "/teams/" + str(team) + "/data/", stat)
 
 def get_match_stats(event, comp_level, match_number):
 	"""
@@ -82,7 +91,7 @@ def parse_firebase_unicode(data):
 def end_of_match(event, team):
 
 	data = parse_firebase_unicode(fb.get(event + "/teams/" + team, None))
-	real_data = data["matches"]["qm"]
+	real_data = data["timd"]["qm"]
 
 	for i in ["Auto-Baseline","Auto-Fuel-High-Cycles","Auto-Fuel-Intake-Hopper","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake","End-Gear-Ground-Intake-Rating","End-No-Show","End-Takeoff","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-High-Cycles-In-Key","Tele-Fuel-High-Cycles-Out-Of-Key","Tele-Fuel-Intake-Hopper","Tele-Fuel-Intake-Loading-Station","Tele-Fuel-Low-Cycles","Tele-Fuel-Low-Cycles-Times","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station","Tele-Gears-Position-Boiler","Tele-Gears-Position-Loading","Tele-Gears-Position-Middle","Tele-Robot-Broke-Down","Tele-Robot-No-Action"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
