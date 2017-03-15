@@ -61,7 +61,11 @@ def teams(auth, event):
 
 	result = {'query' : {'success' : 'yes'}}
 	teams = tba.get_teams(event)
-	result['query']['teams'] = {i : {"team_number" : i} for i in teams}
+        rankings = tba.get_rankings(event)
+        if rankings != {}:
+                result['query']['teams'] = {i : {"team_number" : i, "ranking": rankings[i]["ranking"], "rankingInfo": rankings[i]["rankingInfo"]} for i in teams}
+        else:
+                result['query']['teams'] = {i : {"team_number" : i} for i in teams}
         return jsonify(result)
 
 @app.route('/<string:auth>/error')

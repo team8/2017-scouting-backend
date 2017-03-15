@@ -24,6 +24,19 @@ def get_teams(eventKey):
         
         return return_val
 
+def get_rankings(eventKey):
+        route = "/event/" + eventKey + "/rankings"
+        jsonvar = get_data(route)
+
+        return_val = {}
+        for i in jsonvar:
+                if i[0] != "Rank":
+                        return_val[i[1]] = {"ranking": i[0], "rankingInfo": "Ranking Score: " + str(i[2]) + " - " + str(i[8]) + " (W-L-T)"}
+        
+        return return_val
+
+
+
 def get_data(route):
 	url = "http://www.thebluealliance.com/api/v2" + route
 	request = requests.get(url, headers={'X-TBA-App_Id': 'frc8:scouting:pre-alpha'})
