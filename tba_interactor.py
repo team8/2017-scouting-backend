@@ -66,7 +66,8 @@ class TBAMatch(object):
 		self.red_alliance = Alliance(int(match_dict["alliances"]["red"]["teams"][0][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][1][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
-                self.score_breakdown = match_dict.get("score_breakdown")
+		
+        # self.score_breakdown = match_dict.get("score_breakdown")
 
 class TBAQualRanking(object):
 	def __init__(self, qual_ranking_array):

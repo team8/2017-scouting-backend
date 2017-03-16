@@ -8,6 +8,7 @@ import urllib2
 import firebase_interactor as fb
 import slack_interactor as slack
 import tba_interactor as tba
+import summary_generator as summary
 
 from subprocess import call
 
@@ -77,6 +78,19 @@ def error(auth):
 		return jsonify({"report": "success"})
 	else:
 		return jsonify({"report": "failed"})
+
+@app.route('/prematch/', methods=["POST", "GET"])
+def prematch():
+	data = dict(request.form)
+	url = data['response_url'][0].encode('ascii','ignore')
+
+	summ = summary.construct_message()
+	payload = {"channel": "#driveteam-steamworks", 
+				"username": "Pre-Match Bot", "text": summ, 
+				"icon_emoji": ":kenny:", "response_type": 
+				"in_channel","link_names": 1}
+
+	return jsonify(payload)
 
 @app.route('/<string:auth>/upload_data')
 def upload_data(auth):
