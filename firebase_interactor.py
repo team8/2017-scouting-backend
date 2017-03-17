@@ -22,7 +22,7 @@ def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
 	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
 
-	if stat=="end_notes":
+	if stat=="End-Notes":
 		# The last stat
 		end_of_match(event, team)
 
@@ -64,7 +64,13 @@ def get_match_stats(event, comp_level, match_number):
 
 	return various_timd_map, len(various_timd_map.keys())
 
+def get_comments(event, team):
+	match_stats = parse_firebase_unicode(fb.get(str(event) + "/teams/"+team +"/timd/qm" , None))
+	lst = []
+	for i in match_stats.keys():
+		lst.append(i["End-Notes"])
 
+	return lst
 
 # Firebase basics
 def get_team_matches(event, team, comp_level):
