@@ -172,7 +172,27 @@ def get_stat_achieve_rate(event, team, stat, real_data):
 
 	return float(successes)/float(matches)
 
-#def get_position_prob(event, team, stat, real_data):
+def get_tele_fuel_high_position_prob(event, team, position, real_data):
+
+	total = 0
+	pos = 0
+
+	for i in real_data.keys();
+		pos += float(real_data[i]["Tele-Fuel-High-Cycles-" + str(position)])
+		total += float(real_data[i]["Tele-Fuel-High-Cycles"])
+
+	return float(pos)/float(total)
+
+def get_tele_gear_position_prob(event, team, position, real_data):
+
+	total = 0
+	pos = 0
+
+	for i in real_data.keys();
+		pos += float(real_data[i]["Tele-Gears-Position-" + str(position)])
+		total += float(real_data[i]["Tele-Gears-Cycles"])
+
+	return float(pos)/float(total)
 
 def get_strategy_rate(event, team, stat, real_data):
 
