@@ -17,7 +17,7 @@ def get_matches_with_teams(eventKey):
 	return return_val
 
 def get_teams(eventKey):
-        route = "/event/" + eventKey + "/teams"
+       	route = "/event/" + eventKey + "/teams"
         jsonvar = get_data(route)
         return_val = []
         for i in jsonvar:
@@ -37,7 +37,21 @@ def get_rankings(eventKey):
         
         return return_val
 
+def get_fuel_in_match(eventKey, match_key, alliance, fuel_key):
+	route = "/match/" + eventKey + "_" + match_key
+	jsonvar = get_data(route)
+	score_breakdown = jsonvar.get("score_breakdown")
+	if (score_breakdown != None):
+		return score_breakdown[alliance][fuel_key]
+	return None
 
+def get_defensible_score(eventKey, match_key, alliance):
+	route = "/match/" + eventKey + "_" + match_key
+	jsonvar = get_data(route)
+	score_breakdown = jsonvar.get("score_breakdown")
+	if (score_breakdown != None):
+		return score_breakdown[alliance]["teleopPoints"] - score_breakdown[alliance]["teleopTakeoffPoints"] + score_breakdown[alliance]["foulPoints"]
+	return None
 
 def get_data(route):
 	url = "https://www.thebluealliance.com/api/v2" + route
@@ -67,7 +81,7 @@ class TBAMatch(object):
 									  int(match_dict["alliances"]["red"]["teams"][1][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
 		
-        # self.score_breakdown = match_dict.get("score_breakdown")
+        self.score_breakdown = match_dict.get("score_breakdown")
 
 class TBAQualRanking(object):
 	def __init__(self, qual_ranking_array):
