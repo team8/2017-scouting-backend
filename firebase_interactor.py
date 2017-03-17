@@ -98,12 +98,43 @@ def end_of_match(event, team):
 	data = parse_firebase_unicode(fb.get(event + "/teams/" + team, None))
 	real_data = data["timd"]["qm"]
 
-	for i in ["Auto-Baseline","Auto-Fuel-High-Cycles","Auto-Fuel-Intake-Hopper","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake","End-Gear-Ground-Intake-Rating","End-No-Show","End-Takeoff","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-High-Cycles-In-Key","Tele-Fuel-High-Cycles-Out-Of-Key","Tele-Fuel-Intake-Hopper","Tele-Fuel-Intake-Loading-Station","Tele-Fuel-Low-Cycles","Tele-Fuel-Low-Cycles-Times","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station","Tele-Gears-Position-Boiler","Tele-Gears-Position-Loading","Tele-Gears-Position-Middle","Tele-Robot-Broke-Down","Tele-Robot-No-Action"]:
+	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
 
-	for i in ["Tele-Fuel-High-Cycles-Times", "Tele-Gears-Cycles-Times"]:
+	for i in ["Tele-Fuel-High-Cycles-Times", "Tele-Fuel-Low-Cycles-Times", "Tele-Gears-Cycles-Times"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_cycle_time(event, team, i, real_data))
 
+	for i in ["Tele-Gears-Cycles"]:
+		upload_team_stat(event, team, i+"-Upper-Limit", get_stat_upper_limit(event, team, i, real_data))
+
+	upload_team_stat(event, team, "End-Takeoff-Success-Rate", get_takeoff_success_rate(event, team, real_data))
+
+	for i in ["End-Takeoff","Auto-Baseline","Auto-Gears"]:
+		upload_team_stat(event, team, i+"-Achieve-Rate", get_stat_achieve_rate(event, team, i, real_data))
+
+	#for i in ["b", "m", "l"]:
+	#	upload_team_stat(event, team, "Auto-Gears-"+i+"-Success-Rate", get_auto_gear_success_rate(event, team, i, real_data))
+
+	for i in ["i", "o"]:
+		upload_team_stat(event, team, "Tele-Fuel-High-"+i+"-Position-Prob", get_tele_fuel_high_position_prob(event, team, i, real_data))
+
+	for i in ["b", "m", "l"]:
+		upload_team_stat(event, team, "Tele-Gears-"+i+"-Position-Prob", get_tele_gear_position_prob(event, team, i, real_data))
+
+	for i in ["i", "o"]:
+		upload_team_stat(event, team, "Auto-Fuel-High-"+i+"-Position-Prob", get_auto_fuel_high_position_prob(event, team, i, real_data))
+
+	for i in ["b", "m", "l"]:
+		upload_team_stat(event, team, "Auto-Gears-"+i+"-Position-Prob", get_auto_gear_position_prob(event, team, i, real_data))
+
+	for i in ["Tele-Gears-Cycles","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","End-Defense"]:
+		upload_team_stat(event, team, "Strategy-Rate-"+i, get_strategy_rate(event, team, i, real_data))
+
+	upload_team_stat(event, team, "Reliability", get_reliability(event, team, real_data))
+
+	upload_team_stat(event, team, "Loading-Station-Reliability", get_loading_station_reliability(event, team, real_data))
+
+	
 
 def get_stat_average_per_match(event, team, stat, real_data):
 
@@ -172,12 +203,28 @@ def get_stat_achieve_rate(event, team, stat, real_data):
 
 	return float(successes)/float(matches)
 
+def get_auto_gear_success_rate(event, team, position, real_data):
+
+	total = 0
+	successes = 0
+
+	for i in real_data.keys():
+		for p in real_data[i]["Auto-Gears-Positions"].split(';'):
+			if p == position:
+				total += 1
+				successes += 1
+		for p in real_data[i]["Auto-Gears-Failed-Positions"].split(';'):
+			if p == position:
+				total += 1
+
+	return float(successes)/float(total)
+
 def get_tele_fuel_high_position_prob(event, team, position, real_data):
 
 	total = 0
 	pos = 0
 
-	for i in real_data.keys();
+	for i in real_data.keys():
 		pos += float(real_data[i]["Tele-Fuel-High-Cycles-" + str(position)])
 		total += float(real_data[i]["Tele-Fuel-High-Cycles"])
 
@@ -188,9 +235,35 @@ def get_tele_gear_position_prob(event, team, position, real_data):
 	total = 0
 	pos = 0
 
-	for i in real_data.keys();
+	for i in real_data.keys():
 		pos += float(real_data[i]["Tele-Gears-Position-" + str(position)])
 		total += float(real_data[i]["Tele-Gears-Cycles"])
+
+	return float(pos)/float(total)
+
+def get_auto_fuel_high_position_prob(event, team, position, real_data):
+
+	total = 0
+	pos = 0
+
+	for i in real_data.keys():
+		for p in real_data[i]["Auto-Fuel-High-Positions"].split(';'):
+			if p == position:
+				pos += 1
+		total += float(real_data[i]["Auto-Fuel-High-Cycles"])
+
+	return float(pos)/float(total)
+
+def get_auto_gear_position_prob(event, team, position, real_data):
+
+	total = 0
+	pos = 0
+
+	for i in real_data.keys():
+		for p in real_data[i]["Auto-Gears-Positions"].split(';'):
+			if p == position:
+				pos += 1
+		total += float(real_data[i]["Auto-Gears-Cycles"])
 
 	return float(pos)/float(total)
 
