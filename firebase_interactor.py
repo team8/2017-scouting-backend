@@ -104,7 +104,7 @@ def end_of_match(event, team):
 	data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
 	real_data = data["timd"]["qm"]
 
-	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
+	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-Driver-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
 
 	for i in ["Tele-Fuel-High-Cycles-Times", "Tele-Fuel-Low-Cycles-Times", "Tele-Gears-Cycles-Times"]:
@@ -154,8 +154,8 @@ def get_stat_average_per_match(event, team, stat, real_data):
 
 		total += float(real_data[i][stat])
 		num += 1
-
-	return total/num if num != 0 else 0
+                
+	return float(total)/float(num) if num != 0 else 0
 
 def get_stat_average_cycle_time(event, team, stat, real_data):
 
@@ -168,15 +168,15 @@ def get_stat_average_cycle_time(event, team, stat, real_data):
 		num+=len(collected)
 
 
-	return total/num if num != 0 else 0
+	return float(total)/float(num) if num != 0 else 0
 
 def get_stat_upper_limit(event, team, stat, real_data):
 
 	max = 0
 
 	for i in real_data.keys():
-		if float(real_data[i][stat]) > max:
-			max = real_data[i][stat]
+		if float(real_data[i][stat]) > float(max):
+			max = float(real_data[i][stat])
 
 	return max
 

@@ -1,3 +1,4 @@
+import tba_interactor as tba
 import firebase_interactor as fb
 import sys
 
@@ -20,7 +21,12 @@ def test_calc(event):
         fb.end_of_match(event, key)
 
 fb.authenticate(firebase_secret)
-fb.end_of_match("2017cave", 8)
+for team in tba.get_teams("2017cave"):
+    if team != 114 and team != 1661 and team != 2489 and team != 3859 and team != 3863 and team != 3882 and team != 3965 and team != 4913 and team != 5477 and team != 5678 and team != 6764:
+#        print team
+#        if fb.get("2017cave/teams/" + str(team), "timd") == None:
+#            print "hi"
+        fb.end_of_match("2017cave", team)
 #test_calc("2017inwla")
 #change_match("2017inwla", 4103, 10, 11)
 #switch_team_match("2017inwla", 1018, "qm", 29)
