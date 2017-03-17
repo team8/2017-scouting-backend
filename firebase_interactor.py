@@ -132,3 +132,82 @@ def get_stat_average_cycle_time(event, team, stat, real_data):
 
 
 	return total/num if num != 0 else 0
+
+def get_stat_upper_limit(event, team, stat, real_data):
+
+	max = 0
+
+	for i in real_data.keys():
+		if float(real_data[i][stat]) > max:
+			max = real_data[i][stat]
+
+	return max
+
+def get_takeoff_success_rate(event, team, real_data):
+
+	attempts = 0
+	successes = 0
+
+	for i in real_data.keys():
+		if real_data[i]["End-Takeoff"] != "0":
+			attempts += 1
+			if real_data[i]["End-Takeoff"] == "2":
+				successes += 1
+
+	return float(successes)/float(attempts)
+
+def get_stat_achieve_rate(event, team, stat, real_data):
+
+	matches = 0
+	successes = 0
+
+	for i in real_data.keys():
+		matches += 1
+		val = float(real_data[i][stat])
+		if stat == "End-Takeoff":
+			if val == 2:
+				successes += 1
+		else:
+			successes += min(1, val)
+
+	return float(successes)/float(matches)
+
+#def get_position_prob(event, team, stat, real_data):
+
+def get_strategy_rate(event, team, stat, real_data):
+
+	matches = 0
+	played = 0
+
+	for i in real_data.keys():
+		matches += 1
+		val = float(real_data[i][stat])
+		if val > 0:
+			played += 1
+
+	return float(played)/float(matches)
+
+def get_reliability(event, team, real_data):
+
+	matches = 0
+	working = 0
+
+	for i in real_data.keys():
+		matches += 1
+		if real_data[i]["Tele-No-Action"] == "0" && real_data[i]["Tele-Broke-Down"] == "0":
+			working += 1
+
+	return float(working)/float(matches)
+
+def get_loading_station_reliability(event, team, real_data):
+
+	total = 0
+	intaken = 0
+
+	for i in real_data.keys():
+		intaken_raw = float(real_data[i]["Tele-Gears-Intake-Loading-Station"])
+		dropped = float(real_data[i]["Tele-Gears-Intake-Dropped"])
+		total += intaken_raw + dropped
+		intaken += intaken_raw
+
+	return float(intaken)/float(total)
