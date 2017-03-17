@@ -20,7 +20,8 @@ def test_calc(event):
         fb.end_of_match(event, key)
 
 fb.authenticate(firebase_secret)
-test_calc("2017inwla")
+fb.end_of_match("2017cave", 8)
+#test_calc("2017inwla")
 #change_match("2017inwla", 4103, 10, 11)
 #switch_team_match("2017inwla", 1018, "qm", 29)
 #print(fb.get_timd_stat("2017inwla", 29, "qm", 1018, "Auto-Baseline"))

@@ -83,7 +83,7 @@ class TBAMatch(object):
 									  int(match_dict["alliances"]["red"]["teams"][1][3:]), 
 									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
 		
-        self.score_breakdown = match_dict.get("score_breakdown")
+                self.score_breakdown = match_dict.get("score_breakdown")
 		self.has_been_played = match_dict["score"] == -1
 		self.has_team8 = "8" in self.blue_alliance.get_teams() or "8" in self.red_alliance.get_teams()
 		self.alliance_with_team8 = "Blue" if "8" in self.blue_alliance.get_teams() else "Red"

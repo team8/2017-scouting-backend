@@ -101,7 +101,7 @@ def parse_firebase_unicode(data):
 
 def end_of_match(event, team):
 
-	data = parse_firebase_unicode(fb.get(event + "/teams/" + team, None))
+	data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
 	real_data = data["timd"]["qm"]
 
 	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
@@ -121,10 +121,10 @@ def end_of_match(event, team):
 	#for i in ["b", "m", "l"]:
 	#	upload_team_stat(event, team, "Auto-Gears-"+i+"-Success-Rate", get_auto_gear_success_rate(event, team, i, real_data))
 
-	for i in ["i", "o"]:
+	for i in ["In-Key", "Out-Of-Key"]:
 		upload_team_stat(event, team, "Tele-Fuel-High-"+i+"-Position-Prob", get_tele_fuel_high_position_prob(event, team, i, real_data))
 
-	for i in ["b", "m", "l"]:
+	for i in ["Boiler", "Middle", "Loading"]:
 		upload_team_stat(event, team, "Tele-Gears-"+i+"-Position-Prob", get_tele_gear_position_prob(event, team, i, real_data))
 
 	for i in ["i", "o"]:
@@ -191,7 +191,7 @@ def get_takeoff_success_rate(event, team, real_data):
 			if real_data[i]["End-Takeoff"] == "2":
 				successes += 1
 
-	return float(successes)/float(attempts)
+	return float(successes)/float(attempts) if attempts != 0 else 0
 
 def get_stat_achieve_rate(event, team, stat, real_data):
 
@@ -207,7 +207,7 @@ def get_stat_achieve_rate(event, team, stat, real_data):
 		else:
 			successes += min(1, val)
 
-	return float(successes)/float(matches)
+	return float(successes)/float(matches) if matches != 0 else 0
 
 def get_auto_gear_success_rate(event, team, position, real_data):
 
@@ -223,7 +223,7 @@ def get_auto_gear_success_rate(event, team, position, real_data):
 			if p == position:
 				total += 1
 
-	return float(successes)/float(total)
+	return float(successes)/float(total) if total != 0 else 0
 
 def get_tele_fuel_high_position_prob(event, team, position, real_data):
 
@@ -234,7 +234,7 @@ def get_tele_fuel_high_position_prob(event, team, position, real_data):
 		pos += float(real_data[i]["Tele-Fuel-High-Cycles-" + str(position)])
 		total += float(real_data[i]["Tele-Fuel-High-Cycles"])
 
-	return float(pos)/float(total)
+	return float(pos)/float(total) if total != 0 else 0
 
 def get_tele_gear_position_prob(event, team, position, real_data):
 
@@ -245,7 +245,7 @@ def get_tele_gear_position_prob(event, team, position, real_data):
 		pos += float(real_data[i]["Tele-Gears-Position-" + str(position)])
 		total += float(real_data[i]["Tele-Gears-Cycles"])
 
-	return float(pos)/float(total)
+	return float(pos)/float(total) if total != 0 else 0
 
 def get_auto_fuel_high_position_prob(event, team, position, real_data):
 
@@ -258,7 +258,7 @@ def get_auto_fuel_high_position_prob(event, team, position, real_data):
 				pos += 1
 		total += float(real_data[i]["Auto-Fuel-High-Cycles"])
 
-	return float(pos)/float(total)
+	return float(pos)/float(total) if total != 0 else 0
 
 def get_auto_gear_position_prob(event, team, position, real_data):
 
@@ -269,9 +269,9 @@ def get_auto_gear_position_prob(event, team, position, real_data):
 		for p in real_data[i]["Auto-Gears-Positions"].split(';'):
 			if p == position:
 				pos += 1
-		total += float(real_data[i]["Auto-Gears-Cycles"])
+		total += float(real_data[i]["Auto-Gears"])
 
-	return float(pos)/float(total)
+	return float(pos)/float(total) if total != 0 else 0
 
 def get_strategy_rate(event, team, stat, real_data):
 
@@ -284,7 +284,7 @@ def get_strategy_rate(event, team, stat, real_data):
 		if val > 0:
 			played += 1
 
-	return float(played)/float(matches)
+	return float(played)/float(matches) if matches != 0 else 0
 
 def get_reliability(event, team, real_data):
 
@@ -293,10 +293,10 @@ def get_reliability(event, team, real_data):
 
 	for i in real_data.keys():
 		matches += 1
-		if real_data[i]["Tele-No-Action"] == "0" && real_data[i]["Tele-Broke-Down"] == "0":
+		if real_data[i]["Tele-Robot-No-Action"] == "0" and real_data[i]["Tele-Robot-Broke-Down"] == "0":
 			working += 1
 
-	return float(working)/float(matches)
+	return float(working)/float(matches) if matches != 0 else 0
 
 def get_loading_station_reliability(event, team, real_data):
 
@@ -309,4 +309,4 @@ def get_loading_station_reliability(event, team, real_data):
 		total += intaken_raw + dropped
 		intaken += intaken_raw
 
-	return float(intaken)/float(total)
+	return float(intaken)/float(total) if total != 0 else 0
