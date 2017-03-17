@@ -10,6 +10,8 @@ def get_matches_with_teams(eventKey):
 	route = "/event/" + eventKey + "/matches"
 	jsonvar = get_data(route)
 
+	jsonvar = parse_unicode(jsonvar)
+
 	return_val = []
 	for i in jsonvar:
 		return_val.append(TBAMatch(i))
@@ -82,6 +84,22 @@ class TBAMatch(object):
 									  int(match_dict["alliances"]["red"]["teams"][2][3:]))
 		
         self.score_breakdown = match_dict.get("score_breakdown")
+		self.has_been_played = match_dict["score"] == -1
+		self.has_team8 = "8" in self.blue_alliance.get_teams() or "8" in self.red_alliance.get_teams()
+		self.alliance_with_team8 = "Blue" if "8" in self.blue_alliance.get_teams() else "Red"
+    
+
+	def summary_generator_match(self):
+		return self.has8 and not self.has_been_played
+
+	def get_team8_alliance(self):
+		return self.alliance_with_team8
+
+	def get_red(self):
+		return self.red_alliance.get_teams()
+
+	def get_blue(self):
+		return self.blue_alliance.get_teams()
 
 class TBAQualRanking(object):
 	def __init__(self, qual_ranking_array):
