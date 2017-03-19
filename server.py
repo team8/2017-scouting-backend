@@ -115,6 +115,7 @@ def upload_data(auth):
 				print k
 				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, data[k])
 
+                fb.end_of_match(event, team)
 		return jsonify({"status": "success"})
 	except Exception, e:
 		raise e

@@ -22,9 +22,9 @@ def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
 	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
 
-	if stat=="End-Notes":
+#	if stat=="End-Notes":
 		# The last stat
-		end_of_match(event, team)
+#		end_of_match(event, team)
 
 
 def upload_pit_stat(event, team, stat, value):
@@ -104,7 +104,7 @@ def end_of_match(event, team):
 	data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
 	real_data = data["timd"]["qm"]
 
-	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Dropped","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-Driver-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
+	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-Driver-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
 
 	for i in ["Tele-Fuel-High-Cycles-Times", "Tele-Fuel-Low-Cycles-Times", "Tele-Gears-Cycles-Times"]:
