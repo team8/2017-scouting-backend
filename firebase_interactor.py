@@ -18,13 +18,14 @@ def put(url, key, value):
 def get(url, key):
         return fb.get(url, key)
 
+def get_teams(event):
+        print "Getting teams for event " + str(event)
+        dict = fb.get(str(event), "teams")
+        return dict.keys()
+
 def upload_timd_stat(event, team, comp_level, match_number, stat, value):
 	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
 	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
-
-#	if stat=="End-Notes":
-		# The last stat
-#		end_of_match(event, team)
 
 
 def upload_pit_stat(event, team, stat, value):
@@ -48,19 +49,18 @@ def get_match_stats(event, comp_level, match_number):
 	Returns a dictionary that maps team to data about the match they were in.  The second element is
 	the number of teams that have data uploaded.
 	"""
-	print "Getting match stat: " + str(event) + "/" + str(comp_level) + "/" + str(match_number)
+	print "Getting match stats for " + str(event) + "_" + str(comp_level) + str(match_number)
 
 	match_stats = fb.get(str(event)+"/teams/", None)
 	
 	various_timd_map = {}
-
 	match_stats = parse_firebase_unicode(match_stats)
 	
 	for team in match_stats.keys():
-		if match_stats[team].has_key("matches"):
-			if match_stats[team]["matches"].has_key(comp_level):
-				if match_stats[team]["matches"][comp_level].has_key(match_number):
-					various_timd_map[team] = match_stats[team]["matches"][comp_level][match_number]
+		if match_stats[team].has_key("timd"):
+			if match_stats[team]["timd"].has_key(comp_level):
+				if match_stats[team]["timd"][comp_level].has_key(match_number):
+					various_timd_map[team] = match_stats[team]["timd"][comp_level][match_number]
 
 	return various_timd_map, len(various_timd_map.keys())
 
@@ -74,9 +74,9 @@ def get_comments(event, team):
 
 # Firebase basics
 def get_team_matches(event, team, comp_level):
-	# print "Getting " + str(comp_level) + " match keys for " + str(team)
+	print "Getting " + str(comp_level) + " match keys for " + str(team)
 	matches = []
-	matches_raw = fb.get(str(event) + "/teams/" + str(team)  + "/matches/" + comp_level, None)
+	matches_raw = fb.get(str(event) + "/teams/" + str(team)  + "/timd/" + comp_level, None)
 	if matches_raw != None:
 		try:
 			for match in matches_raw.keys():
@@ -101,8 +101,7 @@ def parse_firebase_unicode(data):
 
 def end_of_match(event, team):
 
-	data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
-	real_data = data["timd"]["qm"]
+	real_data = get_real_data(event, team, "qm")
 
 	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-Driver-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
@@ -118,8 +117,8 @@ def end_of_match(event, team):
 	for i in ["End-Takeoff","Auto-Baseline","Auto-Gears"]:
 		upload_team_stat(event, team, i+"-Achieve-Rate", get_stat_achieve_rate(event, team, i, real_data))
 
-	#for i in ["b", "m", "l"]:
-	#	upload_team_stat(event, team, "Auto-Gears-"+i+"-Success-Rate", get_auto_gear_success_rate(event, team, i, real_data))
+	for i in ["b", "m", "l"]:
+		upload_team_stat(event, team, "Auto-Gears-"+i+"-Success-Rate", get_auto_gear_success_rate(event, team, i, real_data))
 
 	for i in ["In-Key", "Out-Of-Key"]:
 		upload_team_stat(event, team, "Tele-Fuel-High-"+i+"-Position-Prob", get_tele_fuel_high_position_prob(event, team, i, real_data))
@@ -140,7 +139,11 @@ def end_of_match(event, team):
 
 	upload_team_stat(event, team, "Loading-Station-Reliability", get_loading_station_reliability(event, team, real_data))
 
-	
+def get_real_data(event, team, comp_level):
+        print "Getting real TIMD data for team " + str(team) + " in " + str(comp_level) + " matches at " + str(event)
+        data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
+	real_data = data["timd"][comp_level]
+        return real_data
 
 def get_stat_average_per_match(event, team, stat, real_data):
 

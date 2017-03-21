@@ -1,6 +1,7 @@
 import tba_interactor as tba
 import firebase_interactor as fb
 import sys
+import cc
 
 firebase_secret = open(sys.argv[1]).readlines()[1].strip()
 
@@ -32,15 +33,17 @@ def change_event_for_pit(event1, event2):
         fb.put(str(event2) + "/teams/" + str(team), "pit", pit)
 
 fb.authenticate(firebase_secret)
-change_team("2017cave", 6449, 4964, 49)
-change_team("2017cave", 6449, 4964, 21)
-change_team("2017cave", 9999, 3993, 51)
-change_team("2017cave", 5896, 5869, 45)
-change_team("2017cave", 2589, 4078, 36)
-change_team("2017cave", 5665, 5869, 51)
-change_team("2017cave", 3769, 3759, 36)
-change_team("2017cave", 7442, 2443, 48)
-change_team("2017cave", 689, 589, 44)
+cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
+#change_team("2017cave", 2448, 2443, 54)
+#change_team("2017cave", 6449, 4964, 49)
+#change_team("2017cave", 6449, 4964, 21)
+#change_team("2017cave", 9999, 3993, 51)
+#change_team("2017cave", 5896, 5869, 45)
+#change_team("2017cave", 2589, 4078, 36)
+#change_team("2017cave", 5665, 5869, 51)
+#change_team("2017cave", 3769, 3759, 36)
+#change_team("2017cave", 7442, 2443, 48)
+#change_team("2017cave", 689, 589, 44)
 #change_match("2017cave", 981, 34, 35)
 #change_team("2017cave", 1907, 1967, 33)
 #change_match("2017cave", 3863, 8, 7)
