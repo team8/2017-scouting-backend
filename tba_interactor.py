@@ -2,6 +2,9 @@ import requests
 import json
 from collections import defaultdict
 import collections
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_matches_with_teams(eventKey):
 	"""
@@ -27,6 +30,23 @@ def get_teams(eventKey):
         
         return return_val
 
+def get_match(matchKey):
+        route = "/match/" + matchKey
+        jsonvar = get_data(route)
+        return jsonvar
+
+def get_team_alliance(event, team, comp_level, match):
+        match = get_match(str(event) + "_" + str(comp_level) + str(match))
+        if match.get("alliances") is None:
+                print match
+                return None
+        if "frc" + str(team) in match["alliances"]["red"]["teams"]:
+                return "red"
+        elif "frc" + str(team) in match["alliances"]["blue"]["teams"]:
+                return "blue"
+        else:
+                return None
+
 def get_rankings(eventKey):
         route = "/event/" + eventKey + "/rankings"
         jsonvar = get_data(route)
@@ -43,9 +63,9 @@ def get_fuel_in_match(eventKey, match_key, alliance, fuel_key):
 	route = "/match/" + eventKey + "_" + match_key
 	jsonvar = get_data(route)
 	score_breakdown = jsonvar.get("score_breakdown")
-	if (score_breakdown != None):
+	if (score_breakdown is not None):
 		return score_breakdown[alliance][fuel_key]
-	return None
+	return 0
 
 def get_defensible_score(eventKey, match_key, alliance):
 	route = "/match/" + eventKey + "_" + match_key
