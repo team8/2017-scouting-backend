@@ -60,11 +60,15 @@ def teams(auth, event):
 	if auth != auth_code:
 		return jsonify({'query':{'success' : 'no'}})
 
-	result = {'query' : {'success' : 'yes'}}
+	result = {'query' : {'success' : 'yes', 'teams': {}}}
 	teams = tba.get_teams(event)
         rankings = tba.get_rankings(event)
         if rankings != {}:
-                result['query']['teams'] = {i : {"team_number" : i, "ranking": rankings[i]["ranking"], "rankingInfo": rankings[i]["rankingInfo"]} for i in teams}
+                for i in teams:
+                        if rankings.get(i) != None:
+                                result['query']['teams'][i] = {"team_number" : i, "ranking": rankings.get(i)["ranking"], "rankingInfo": rankings.get(i)["rankingInfo"]}
+                        else:
+                                result['query']['teams'][i] = {"team_number" : i}
         else:
                 result['query']['teams'] = {i : {"team_number" : i} for i in teams}
         return jsonify(result)
@@ -111,6 +115,7 @@ def upload_data(auth):
 				print k
 				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, data[k])
 
+                fb.end_of_match(event, team)
 		return jsonify({"status": "success"})
 	except Exception, e:
 		raise e
