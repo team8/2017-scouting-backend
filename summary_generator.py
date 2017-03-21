@@ -14,7 +14,7 @@ EVENT = "2017cave"
 sentence = """*In the upcoming match, Paly Robotics is on the {0} alliance.*"""
 
 team_sentence = """{0} is currently ranked #{1} with {2} *RP*, and they are focused on {3}.  
-The team scores {4} gears and {5} *fuel per match*.  They have climbed in {6} out of {7} matches and their overall OPR is {8}.  The following are the comments from the {9}.
+The team scores {4} gears and {5} *fuel per match*.  They have climbed in {6} out of {7} matches and their overall OPR is {8}. 
 """.replace("{", "*{").replace("}", "}*").replace("\n", "") + "\n\n"
 
 
@@ -73,9 +73,7 @@ def format_team(team_number):
 		else:
 			strategy += "not clear"
 
-	notes = str(fb.get_comments(EVENT, team_number))
-
-	return team_sentence.format(team_text, overall_rank, rps, strategy, average_gears, average_shooting, average_scales, total_plays, opr, notes)
+	return team_sentence.format(team_text, overall_rank, rps, strategy, average_gears, average_shooting, average_scales, total_plays, opr)
 
 def decide_our_strategy(opponents, our_team):
 
@@ -124,7 +122,7 @@ def calc_prospective_rotors(gears):
 	return max_, left_over_gears, left_over_gears/(left_over_gears + gears_to_next_rotor)
 
 def get_match():
-	matches = tba.get_matches_with_teams()
+	matches = tba.get_matches_with_teams(EVENT)
 
 	for i in matches:
 		if i.summary_generator_match():
@@ -132,22 +130,22 @@ def get_match():
 
 def construct_message():
 
-	# our_color = ""
+	our_color = ""
 
-	# match = get_match()
+	match = get_match()
 
-	# our_color = match[2]
+	our_color = match[2]
 
-	# if our_color == "Blue":
-	# 	our_alliance = match[1]
-	# 	their_alliance = match[0]
-	# else:
-	# 	our_alliance = match[0]
-	# 	their_alliance = match[1]
+	if our_color == "Blue":
+		our_alliance = match[1]
+		their_alliance = match[0]
+	else:
+		our_alliance = match[0]
+		their_alliance = match[1]
 
-	our_color = "Blue"
-	our_alliance = ["8", "589","981"]
-	their_alliance = ["1138", "1515", "5818"]
+	# our_color = "Blue"
+	# our_alliance = ["8", "589","981"]
+	# their_alliance = ["1138", "1515", "5818"]
 
 
 	message = sentence.format(our_color)
@@ -170,4 +168,5 @@ def construct_message():
 	message += decide_our_strategy(their_alliance, our_alliance)
 	message += tags_at_the_end
 	# send_message(message)
+	slack.send_message(message)
 	return message

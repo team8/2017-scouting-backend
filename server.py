@@ -89,9 +89,9 @@ def prematch():
 	url = data['response_url'][0].encode('ascii','ignore')
 
 	summ = summary.construct_message()
-	payload = {"channel": "#driveteam-steamworks", 
-				"username": "Pre-Match Bot", "text": summ, 
-				"icon_emoji": ":kenny:", "response_type": 
+	payload = {"channel": "#driveteam-steamworks",
+				"username": "Pre-Match Bot", "text": summ,
+				"icon_emoji": ":kenny:", "response_type":
 				"in_channel","link_names": 1}
 
 	return jsonify(payload)
@@ -150,7 +150,7 @@ def upload_pit_data(auth):
 def handle_error(e):
 	data = traceback.format_exc()
 	print "Encountered a Flask-Based error {}.  Value: {}.  Full Traceback: {}".format(type(e).__name__, str(e), data)
-	
+
 	slack.send_message("Encountered a flask exception of type `{}`.  The value printed was `{}`.  A full traceback is below. \n\n ```{}```".format(type(e).__name__, str(e), data))
 
 	return jsonify({"status": "error"})
