@@ -23,9 +23,9 @@ def get_teams(event):
         dict = fb.get(str(event), "teams")
         return dict.keys()
 
-def upload_timd_stat(event, team, comp_level, match_number, stat, value):
-	print "Uploading TIMD stat: " + str(team) + " - " + str(stat) + ": " + str(value) + " in " + str(comp_level) + str(match_number)
-	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level) + "/" + str(match_number), stat, value)
+def upload_timd_stat(event, team, comp_level, match_number, stats):
+	print "Uploading TIMD stat: " + str(team) + " - " + str(stats) + " in " + str(comp_level) + str(match_number)
+	fb.put(str(event) + "/teams/" + str(team) + "/timd/" + str(comp_level), str(match_number), stats)
 
 
 def upload_pit_stat(event, team, stat, value):

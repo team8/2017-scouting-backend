@@ -4,6 +4,7 @@ import sys
 import traceback
 import json
 import urllib2
+import threading
 
 import firebase_interactor as fb
 import slack_interactor as slack
@@ -103,19 +104,27 @@ def upload_data(auth):
 
 	data = {i[0]:i[1] for i in data}
 	print data
+
 	try:
 		event = data["Event"]
 		#event = "2017cave"
 		team = data["Team-Number"]
 		comp_level = data["Comp-Level"]
 		matchNumber = data["Match-Number"]
-                matchIn = data["Match-In"]
+		matchIn = data["Match-In"]
+
+		uploadable = {}
+
 		for k in data.keys():
 			if k not in ["Event", "Team-Number", "Comp-Level", "Match-Number", "Match-In", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
-				print k
-				fb.upload_timd_stat(event, team, comp_level, matchNumber, k, data[k])
+				uploadable[k] = data[k]
 
-                fb.end_of_match(event, team)
+		fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
+		print "Uploaded"
+
+		newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
+		newEndOfmatchThread.start()
+
 		return jsonify({"status": "success"})
 	except Exception, e:
 		raise e
