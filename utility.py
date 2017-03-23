@@ -33,7 +33,12 @@ def change_event_for_pit(event1, event2):
         fb.put(str(event2) + "/teams/" + str(team), "pit", pit)
 
 fb.authenticate(firebase_secret)
-cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
+cc.calculate_adjusted_dprs("2017cave")
+#dict = cc.calculate_defensible_oprs("2017cave")
+#for key in dict.keys():
+#    fb.put("2017cave/teams/" + str(key) + "/data", "Cc-Defensible-OPR", dict[key])
+#cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
+#cc.calculate_defensible_oprs("2017cave")
 #change_team("2017cave", 2448, 2443, 54)
 #change_team("2017cave", 6449, 4964, 49)
 #change_team("2017cave", 6449, 4964, 21)
