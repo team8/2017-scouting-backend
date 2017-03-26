@@ -1,6 +1,6 @@
 import tba_interactor as tba
 import firebase_interactor as fb
-import TBAconnection
+# import TBAconnection
 import scipy as sp
 from scipy import linalg
 import math

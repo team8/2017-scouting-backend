@@ -1,7 +1,7 @@
-import tba_interactor as tba
+# import tba_interactor as tba
 import firebase_interactor as fb
 import sys
-import cc
+# import cc
 
 firebase_secret = open(sys.argv[1]).readlines()[1].strip()
 
@@ -32,13 +32,26 @@ def change_event_for_pit(event1, event2):
         pit = fb.parse_firebase_unicode(data).get("pit")
         fb.put(str(event2) + "/teams/" + str(team), "pit", pit)
 
+def import_skyes():
+    f = open("sykes-svrweek3.csv", "r")
+    data = [[j.replace("\n", "").replace("\r", "") for j in i.split(",")] for i in f.readlines()]
+
+    print data
+    raw_input()
+
+    for i in data[1:]:
+        for j in range(2,len(i)):
+            fb.upload_team_stat("2017casj", i[0], data[0][j], i[j])
+
 fb.authenticate(firebase_secret)
-cc.calculate_adjusted_dprs("2017cave")
+# cc.calculate_adjusted_dprs("2017cave")
 #dict = cc.calculate_defensible_oprs("2017cave")
 #for key in dict.keys():
 #    fb.put("2017cave/teams/" + str(key) + "/data", "Cc-Defensible-OPR", dict[key])
 #cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
 #cc.calculate_defensible_oprs("2017cave")
+import_skyes()
+# cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
 #change_team("2017cave", 2448, 2443, 54)
 #change_team("2017cave", 6449, 4964, 49)
 #change_team("2017cave", 6449, 4964, 21)

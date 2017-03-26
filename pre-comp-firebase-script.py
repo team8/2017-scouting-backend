@@ -2,7 +2,7 @@
 import tba_interactor as tba
 import firebase_interactor as fb
 
-EVENT = "2017cave"
+EVENT = "2017casj"
 
 teams = tba.get_teams(EVENT)
 
