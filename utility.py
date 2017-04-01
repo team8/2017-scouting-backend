@@ -1,4 +1,4 @@
-# import tba_interactor as tba
+import tba_interactor as tba
 import firebase_interactor as fb
 import sys
 # import cc
@@ -28,9 +28,11 @@ def test_calc(event):
 def change_event_for_pit(event1, event2):
     teams = fb.get(str(event1), "teams")
     for (team) in teams:
-        data = fb.get(str(event1) + "/teams/", str(team))
-        pit = fb.parse_firebase_unicode(data).get("pit")
-        fb.put(str(event2) + "/teams/" + str(team), "pit", pit)
+        if fb.get(str(event2) + "/teams/" + str(team), "pit") is None:
+            data = fb.get(str(event1) + "/teams/", str(team))
+            if data is not None:
+                pit = fb.parse_firebase_unicode(data).get("pit")
+                fb.put(str(event2) + "/teams/" + str(team), "pit", pit)
 
 def import_skyes():
     f = open("sykes-svrweek3.csv", "r")
@@ -43,14 +45,59 @@ def import_skyes():
         for j in range(2,len(i)):
             fb.upload_team_stat("2017casj", i[0], data[0][j], i[j])
 
+def find_no_pit(event):
+    teams = fb.get(str(event), "teams")
+    for (team) in teams:
+        if fb.get(str(event) + "/teams/" + str(team), "pit") is None:
+            print team
+
+def find_no_auto_notes(event):
+    teams = fb.get(str(event), "teams")
+    for (team) in teams:
+        if fb.get(str(event) + "/teams/" + str(team) + "/pit/", "Auto-Notes") is None:
+            print team
+    
+def find_wrong_data(event):
+    matches = tba.get_matches_with_teams(event)
+    teams = fb.get(str(event), "teams")
+    for (team) in teams:
+        timds = fb.get(str(event) + "/teams/" + str(team) + "/timd", "qm")
+        for (timd) in timds:
+            valid = False
+            for (match) in matches:
+                if str(match.match_number) == str(timd) and (int(team) in match.blue_alliance.teams or int(team) in match.red_alliance.teams):
+                    valid = True
+            if valid == False:
+                print "Bad data for team " + str(team) + " in match " + str(timd)
+
+            
 fb.authenticate(firebase_secret)
+#change_team("2017casj", 2145, 2135, 1)
+#change_match("2017casj", 6410, 14, 15)
+#change_match("2017casj", 971, 33, 34)
+#change_match("2017casj", 254, 25 ,26)
+#change_match("2017casj", 5728, 43, 44)
+#change_match("2017casj", 5728, 29, 30)
+#change_match("2017casj", 4159, 57, 56)
+#change_match("2017casj", 4159, 45, 46)
+find_wrong_data("2017casj")
+#change_team("2017casj", 2474, 2473, 30)
+#change_team("2017casj", 3382, 3482, 26)
+#switch_team_match("2017casj", 2643, "qm", 50)
+#change_match("2017casj", 581, 38753, 14)
+#change_match("2017casj", 846, 28548, 13)
+#find_no_auto_notes("2017casj")
+#change_event_for_pit("2017casj_practice", "2017casj")
+#find_no_pit("2017casj")
+#change_team("2017casj", 2613, 2813, 12694501)
+#change_team("2017casj", 5739, 5737, 111111111)
 # cc.calculate_adjusted_dprs("2017cave")
 #dict = cc.calculate_defensible_oprs("2017cave")
 #for key in dict.keys():
 #    fb.put("2017cave/teams/" + str(key) + "/data", "Cc-Defensible-OPR", dict[key])
 #cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
 #cc.calculate_defensible_oprs("2017cave")
-import_skyes()
+#import_skyes()
 # cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
 #change_team("2017cave", 2448, 2443, 54)
 #change_team("2017cave", 6449, 4964, 49)
@@ -68,7 +115,7 @@ import_skyes()
 #change_match("2017cave", 8, 7656755, 6)
 #change_team("2017cave", 881, 981, 4)
 #change_team("2017cave", 4954, 4964, 25)
-#change_event_for_pit("2017cave_practice", "2017cave")
+#change_event_for_pit("2017cave", "2017casj")
 #for team in tba.get_teams("2017cave"):
 #    if team != 114 and team != 1661 and team != 2489 and team != 3859 and team != 3863 and team != 3882 and team != 3965 and team != 4913 and team != 5477 and team != 5678 and team != 6764:
 #        print team
@@ -77,5 +124,11 @@ import_skyes()
 #        fb.end_of_match("2017cave", team)
 #test_calc("2017inwla")
 #change_match("2017inwla", 4103, 10, 11)
-#switch_team_match("2017inwla", 1018, "qm", 29)
+#switch_team_match("2017casj", 100, "qm", 8)
+#switch_team_match("2017casj", 668, "qm", 8)
+#switch_team_match("2017casj", 852, "qm", 8)
+#switch_team_match("2017casj", 4158, "qm", 8)
+#switch_team_match("2017casj", 5737, "qm", 8)
+#switch_team_match("2017casj", 5924, "qm", 8)
+#switch_team_match("2017casj", 6039, "qm", 8)
 #print(fb.get_timd_stat("2017inwla", 29, "qm", 1018, "Auto-Baseline"))
