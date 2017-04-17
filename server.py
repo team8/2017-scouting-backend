@@ -119,6 +119,9 @@ def upload_data(auth):
 			if k not in ["Event", "Team-Number", "Comp-Level", "Match-Number", "Match-In", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
 				uploadable[k] = data[k]
 
+		if int(uploadable["Auto-Gears"]) + int(uploadable["Auto-Gears-Failed"]) > 0:
+			uploadable["Auto-Baseline"] = "1"
+
 		fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
 		print "Uploaded"
 
