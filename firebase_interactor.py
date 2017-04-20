@@ -2,6 +2,9 @@ from __future__ import division
 import firebase
 import firebasecustomauth
 import collections
+import math_implementation as math
+import time
+import slack_interactor as slack
 
 
 # Initialize Firebase
@@ -38,7 +41,17 @@ def get_timd_stat(event, team, comp_level, match_number, stat):
 
 def upload_team_stat(event, team, stat, value):
 	print "Uploading team stat: " + str(team) + " - " + str(stat) + ": " + str(value)
-	fb.put(str(event) + "/teams/" + str(team) + "/data/", stat, value)
+
+	try:
+		fb.put(str(event) + "/teams/" + str(team) + "/data/", stat, value)
+	except Exception:
+		try:
+			# wait and try again
+			time.sleep(1)
+			fb.put(str(event) + "/teams/" + str(team) + "/data/", stat, value)
+		except:
+			# If it still fails, alert us on slack
+			slack.send_message("Unable to upload to stat {}.  Value was {}".format(stat, value))
 
 def get_team_stat(event, team, stat):
 	print "Getting team stat: " + str(team) + "'s " + str(stat)
@@ -105,6 +118,7 @@ def end_of_match(event, team):
 
 	for i in ["Auto-Fuel-High-Cycles","Auto-Fuel-Low-Cycles","Auto-Gears","Auto-Gears-Intake-Ground","Auto-Robot-Broke-Down","Auto-Robot-No-Action","End-Defense","End-Defense-Rating","End-Fuel-Ground-Intake-Rating","End-Gear-Ground-Intake-Rating","End-Driver-Rating","End-No-Show","End-Takeoff-Speed","Tele-Fuel-High-Cycles","Tele-Fuel-Low-Cycles","Tele-Gears-Cycles","Tele-Gears-Dropped","Tele-Gears-Intake-Dropped","Tele-Gears-Intake-Ground","Tele-Gears-Intake-Loading-Station"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_per_match(event, team, i, real_data))
+		upload_team_stat(event, team, i+"-Stdev", get_stat_std(event, team, i, real_data))
 
 	for i in ["Tele-Fuel-High-Cycles-Times", "Tele-Fuel-Low-Cycles-Times", "Tele-Gears-Cycles-Times"]:
 		upload_team_stat(event, team, i+"-Average", get_stat_average_cycle_time(event, team, i, real_data))
@@ -143,11 +157,12 @@ def end_of_match(event, team):
         upload_team_stat(event, team, "Auto-Gear-Counts", get_gear_counts(event, team, "Auto", real_data))
         upload_team_stat(event, team, "Tele-Gear-Counts", get_gear_counts(event, team, "Tele", real_data))
 
+
 def get_real_data(event, team, comp_level):
-        print "Getting real TIMD data for team " + str(team) + " in " + str(comp_level) + " matches at " + str(event)
-        data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
+	print "Getting real TIMD data for team " + str(team) + " in " + str(comp_level) + " matches at " + str(event)
+	data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
 	real_data = data["timd"][comp_level]
-        return real_data
+	return real_data
 
 def get_stat_average_per_match(event, team, stat, real_data):
 
@@ -163,6 +178,22 @@ def get_stat_average_per_match(event, team, stat, real_data):
 		num += 1
                 
 	return float(total)/float(num) if num != 0 else 0
+
+def get_stat_std(event, team, stat, real_data):
+	data = []
+
+	for i in real_data.keys():
+
+		if real_data[i][stat] == "" or real_data[i][stat] == "-1":
+			continue
+
+		data.append(float(real_data[i][stat]))
+    
+	stddev = math.get_std_dev(data)
+	if stddev != stddev:
+		return 0 # NAN
+	else:
+		return stddev
 
 def get_stat_average_cycle_time(event, team, stat, real_data):
 

@@ -97,8 +97,31 @@ def prematch():
 
 	return jsonify(payload)
 
+@app.route('/teamdata/', methods=["POST", "GET"])
+def teamdata():
+	data = dict(request.form)
+	# url = data['response_url'][0].encode('ascii','ignore')
+	team = str(data["text"]).strip("[").strip("]").strip("\'")[2:]
+	print len(team)
+	message = fb.get("/2017cave/teams/" + team, None)
+
+	print team
+
+	payload = {"channel": "#match-bot-dev",
+				"username": "Pre-Match Bot", "text": message,
+				"icon_emoji": ":kenny:", "response_type":
+				"in_channel","link_names": 1}
+
+	print payload
+	slack.send_message(message, channel="#match-bot-dev")
+
+	return jsonify(payload)
+
 @app.route('/<string:auth>/upload_data')
 def upload_data(auth):
+	if auth != auth_code:
+		return jsonify({'query':{'success' : 'no'}})
+
 	data_elements = request.headers # Expects the header to be a JSON arrays
 	data = data_elements.to_list()
 
@@ -166,6 +189,7 @@ def upload_data(auth):
                 slack.send_test_results1(message, channel="#squadron-" + str(scouterteam))
                 slack.send_test_results2(message, channel="#scouting-cmp2017")
                 #fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
+
 		print "Uploaded"
 
 		#newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
@@ -178,6 +202,9 @@ def upload_data(auth):
 
 @app.route('/<string:auth>/upload_pit_data')
 def upload_pit_data(auth):
+	if auth != auth_code:
+		return jsonify({'query':{'success' : 'no'}})
+
 	data_elements = request.headers # Expects the header to be a JSON arrays
 	data = data_elements.to_list()
 
@@ -188,8 +215,8 @@ def upload_pit_data(auth):
 		#event = "2017cave"
 		team = data["Team-Number"]
 		#comp_level = data["Comp-Level"]
-		#matchNumber = data["Match-Number"]
-                #matchIn = data["Match-In"]
+		#matchNumber = data["Match-Number"]		
+		#matchIn = data["Match-In"]
 		for k in data.keys():
 			if k not in ["Event", "Team-Number", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
 				print k
