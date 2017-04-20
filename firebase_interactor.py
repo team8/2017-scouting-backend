@@ -137,7 +137,11 @@ def end_of_match(event, team):
 
 	upload_team_stat(event, team, "Reliability", get_reliability(event, team, real_data))
 
-	upload_team_stat(event, team, "Loading-Station-Reliability", get_loading_station_reliability(event, team, real_data))
+	upload_team_stat(event, team, "Loading-Station-Reliability", get_loading_station_reliability(event, team, real_data
+))
+
+        upload_team_stat(event, team, "Auto-Gear-Counts", get_gear_counts(event, team, "Auto", real_data))
+        upload_team_stat(event, team, "Tele-Gear-Counts", get_gear_counts(event, team, "Tele", real_data))
 
 def get_real_data(event, team, comp_level):
         print "Getting real TIMD data for team " + str(team) + " in " + str(comp_level) + " matches at " + str(event)
@@ -194,7 +198,9 @@ def get_takeoff_success_rate(event, team, real_data):
 			if real_data[i]["End-Takeoff"] == "2":
 				successes += 1
 
-	return float(successes)/float(attempts) if attempts != 0 else 0
+        retval = str(round(float(successes)/float(attempts)*100, 2)) + "% (" + str(successes) + " of " + str(attempts) + " attempts)" if attempts != 0 else "0% (0 of 0 attempts)"
+
+	return retval
 
 def get_stat_achieve_rate(event, team, stat, real_data):
 
@@ -210,7 +216,12 @@ def get_stat_achieve_rate(event, team, stat, real_data):
 		else:
 			successes += min(1, val)
 
-	return float(successes)/float(matches) if matches != 0 else 0
+        if stat == "End-Takeoff":
+                retval = str(round(float(successes)/float(matches)*100, 2)) + "% (" + str(successes) + " of " + str(matches) + " matches)" if matches != 0 else "0% (0 of 0 matches)"
+        else:
+                retval = round(float(successes)/float(matches), 2) if matches != 0 else 0
+                
+	return retval
 
 def get_auto_gear_success_rate(event, team, position, real_data):
 
@@ -313,3 +324,18 @@ def get_loading_station_reliability(event, team, real_data):
 		intaken += intaken_raw
 
 	return float(intaken)/float(total) if total != 0 else 0
+
+def get_gear_counts(event, team, period, real_data):
+
+        retval = ""
+
+        for i in real_data.keys():
+                if retval != "":
+                        retval += ","
+                key = period + "-Gears"
+                if period == "Tele":
+                        key += "-Cycles"
+                retval += real_data[i][key]
+
+        return retval
+

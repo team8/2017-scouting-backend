@@ -153,6 +153,7 @@ def calculate_adjusted_dprs(event):
                             dopr = fb.get_team_stat(event, team, "Cc-Defensible-OPR")
                             if dopr is not None:
                                 dopr_sums += dopr
+                        print dopr_sums
                         B[teams.index(blue_teams[i])][0] += dopr_sums - (match.score_breakdown["red"]["teleopPoints"] + match.score_breakdown["red"]["foulPoints"])
                 if red_teams[i] in teams:
                     if fb.get_timd_stat(event, red_teams[i], "qm", match.match_number, "End-Defense") == "1":
@@ -161,6 +162,7 @@ def calculate_adjusted_dprs(event):
                             dopr = fb.get_team_stat(event, team, "Cc-Defensible-OPR")
                             if dopr is not None:
                                 dopr_sums += dopr
+                        print dopr_sums
                         B[teams.index(red_teams[i])][0] += dopr_sums - (match.score_breakdown["blue"]["teleopPoints"] + match.score_breakdown["blue"]["foulPoints"])
 
 
