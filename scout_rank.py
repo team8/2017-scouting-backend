@@ -11,7 +11,9 @@ def get_matches_with_teams():
 
 	return_val = []
 	for i in jsonvar:
-		return_val.append(FullTBAMatch(i))
+		# print i
+		if "score_breakdown" in i and i["score_breakdown"] != None:
+			return_val.append(FullTBAMatch(i))
 
 	return return_val
 
@@ -50,12 +52,22 @@ class FullTBAMatch(object):
 		self.blue_rotors = match_dict["score_breakdown"]["blue"]["rotor1Engaged"] + match_dict["score_breakdown"]["blue"]["rotor2Engaged"] + match_dict["score_breakdown"]["blue"]["rotor3Engaged"] + match_dict["score_breakdown"]["blue"]["rotor4Engaged"]
 		self.red_rotors = match_dict["score_breakdown"]["red"]["rotor1Engaged"] + match_dict["score_breakdown"]["red"]["rotor2Engaged"] + match_dict["score_breakdown"]["red"]["rotor3Engaged"] + match_dict["score_breakdown"]["red"]["rotor4Engaged"]
 
+		self.blue_climbs = match_dict["score_breakdown"]["blue"]["touchpadFar"] + match_dict["score_breakdown"]["blue"]["touchpadMiddle"] + match_dict["score_breakdown"]["blue"]["touchpadNear"]
+		self.red_climbs = match_dict["score_breakdown"]["red"]["touchpadFar"] + match_dict["score_breakdown"]["red"]["touchpadMiddle"] + match_dict["score_breakdown"]["red"]["touchpadNear"] 
+		self.blue_climbs = self.blue_climbs.count("Ready")
+		self.red_climbs = self.red_climbs.count("Ready")
 
 	def get_blue_rotors(self):
 		return self.blue_rotors
 
 	def get_red_rotors(self):
 		return self.red_rotors
+
+	def get_red_climbs(self):
+		return self.red_climbs
+
+	def get_blue_climbs(self):
+		return self.blue_climbs
 
 	def get_key(self):
 		return self.key
@@ -123,6 +135,9 @@ def gears_to_rotors(gears):
 
 firebase_data = json.loads(open("svr-data.json").read())
 
+
+print len(get_matches_with_teams())
+
 for match in get_matches_with_teams():
 
 	should_be_red = match.get_red_rotors()
@@ -139,6 +154,7 @@ for match in get_matches_with_teams():
 		if match.get_key_as_displayable() in firebase_data["teams"][i[3:]]["timd"]["qm"]:
 			actual_gears_red += int(firebase_data["teams"][i[3:]]["timd"]["qm"][match.get_key_as_displayable()]["Tele-Gears-Cycles"])
 			actual_gears_red += int(firebase_data["teams"][i[3:]]["timd"]["qm"][match.get_key_as_displayable()]["Auto-Gears"])
+			# actual_gears_red += 1
 			name_string_red += str(firebase_data["teams"][i[3:]]["timd"]["qm"][match.get_key_as_displayable()]["Name"] + ",")
 		else:
 			actual_gears_red = - (1 << 10)
@@ -148,6 +164,7 @@ for match in get_matches_with_teams():
 		if match.get_key_as_displayable() in firebase_data["teams"][i[3:]]["timd"]["qm"]:
 			actual_gears_blue += int(firebase_data["teams"][i[3:]]["timd"]["qm"][match.get_key_as_displayable()]["Tele-Gears-Cycles"])
 			actual_gears_blue += int(firebase_data["teams"][i[3:]]["timd"]["qm"][match.get_key_as_displayable()]["Auto-Gears"])
+			# actual_gears_blue += 1
 			name_string_blue += str(firebase_data["teams"][i[3:]]["timd"]["qm"][match.get_key_as_displayable()]["Name"] + ",")
 		else:
 			actual_gears_blue = - (1 << 10)

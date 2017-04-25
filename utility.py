@@ -2,6 +2,7 @@ import tba_interactor as tba
 import firebase_interactor as fb
 import sys
 # import cc
+import threading
 
 firebase_secret = open(sys.argv[1]).readlines()[1].strip()
 
@@ -43,7 +44,8 @@ def import_skyes():
 
     for i in data[1:]:
         for j in range(2,len(i)):
-            fb.upload_team_stat("2017casj", i[0], data[0][j], i[j])
+            print "Uploading For Team #{}.  Stat {} Value {}".format(i[0], data[0][j], i[j])
+            fb.upload_team_stat("2017roe", i[0], data[0][j], i[j])
 
 def find_no_pit(event):
     teams = fb.get(str(event), "teams")
@@ -56,7 +58,7 @@ def find_no_auto_notes(event):
     for (team) in teams:
         if fb.get(str(event) + "/teams/" + str(team) + "/pit/", "Auto-Notes") is None:
             print team
-    
+
 def find_wrong_data(event):
     matches = tba.get_matches_with_teams(event)
     teams = fb.get(str(event), "teams")
@@ -70,7 +72,7 @@ def find_wrong_data(event):
             if valid == False:
                 print "Bad data for team " + str(team) + " in match " + str(timd)
 
-            
+
 fb.authenticate(firebase_secret)
 #change_team("2017casj", 2145, 2135, 1)
 #change_match("2017casj", 6410, 14, 15)
@@ -80,7 +82,13 @@ fb.authenticate(firebase_secret)
 #change_match("2017casj", 5728, 29, 30)
 #change_match("2017casj", 4159, 57, 56)
 #change_match("2017casj", 4159, 45, 46)
-find_wrong_data("2017casj")
+# find_wrong_data("2017casj")
+
+#import_skyes()
+# for i in fb.get_teams("2017casj"):
+#     newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=("2017casj", i))
+#     newEndOfmatchThread.start()
+
 #change_team("2017casj", 2474, 2473, 30)
 #change_team("2017casj", 3382, 3482, 26)
 #switch_team_match("2017casj", 2643, "qm", 50)
