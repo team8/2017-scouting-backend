@@ -129,12 +129,26 @@ def upload_data(auth):
 	print data
 
 	try:
-		event = data["Event"]
-		#event = "2017cave"
+		#event = data["Event"]
+                event = "testing"
 		team = data["Team-Number"]
-		comp_level = data["Comp-Level"]
-		matchNumber = data["Match-Number"]
-		matchIn = data["Match-In"]
+                #comp_level = data["Comp-Level"]
+                #matchNumber = data["Match-Number"]
+                comp_level = "pr"
+                matchNumber = 0
+                if data["Comp-Level"] == "sf":
+                        matchNumber = 5
+                elif data["Comp-Level"] == "qf":
+                        matchNumber = 2
+                else:
+                        matchNumber = {
+                                "22": 1,
+                                "64": 3,
+                                "15": 4
+                        }.get(data["Match-Number"])
+                if matchNumber == None:
+                        matchNumber = data["Match-Number"]
+                matchIn = data["Match-In"]
 
 		uploadable = {}
 
@@ -142,14 +156,44 @@ def upload_data(auth):
 			if k not in ["Event", "Team-Number", "Comp-Level", "Match-Number", "Match-In", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
 				uploadable[k] = data[k]
 
-		if int(uploadable["Auto-Gears"]) + int(uploadable["Auto-Gears-Failed"]) > 0:
-			uploadable["Auto-Baseline"] = "1"
+                #if int(uploadable["Auto-Gears"]) > 0:
+                #        uploadable["Auto-Baseline"] = "1"
 
-		fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
+                scouterteam = 0
+                for t in ["8", "1339", "4561", "5472", "5499", "6560"]:
+                        if t in uploadable["Name"]:
+                                scouterteam = t
+                if scouterteam == 0:
+                        scouterteam = 8
+                message = ""
+                test_passed = True
+                answerkey = fb.get("testing/teams/" + str(team) + "/timd/" + comp_level, matchNumber)
+                #print answerkey
+                if answerkey is None:
+                        message = "Error: No answer key for this match-team pair (Team " + str(team) + " in Match " + str(matchNumber) + ")"
+                        slack.send_test_results1(message, channel="#squadron-" + str(scouterteam))
+                        slack.send_test_results2(message, channel="#scouting-cmp2017")
+                        return jsonify({"status": "success"})
+                for k in uploadable.keys():
+                        if k not in ["End-Notes", "End-Defense-Rating", "End-Fuel-Ground-Intake-Rating", "End-Gear-Ground-Intake-Rating", "Name", "Tele-Fuel-High-Cycles-Times", "Tele-Gears-Cycles-Times", "Tele-Fuel-Low-Cycles-Times", "End-Driver-Rating", "End-Takeoff-Speed", "End-Defense"]:
+                                if uploadable[k] != answerkey[k]:
+                                        test_passed = False
+                                        if k in ["Auto-Gears", "Auto-Baseline", "End-Takeoff"]:
+                                                message += "\n*" + k + " - Answered: " + uploadable[k] + ", Correct: " + answerkey[k] + "*"
+                                        else:
+                                                message += "\n" + k + " - Answered: " + uploadable[k] + ", Correct: " + answerkey[k]
+                if test_passed == True:
+                        message = uploadable["Name"] + " (Team " + str(scouterteam) + ") has passed match " + str(matchNumber) + " (Team " + str(team) + ") of the practical test! Congratulations!"
+                else:
+                        message = uploadable["Name"] + " (Team " + str(scouterteam) + ") has failed match " + str(matchNumber) + " (Team " + str(team) + ") of the practical test. Incorrect reponses:" + message
+                slack.send_test_results1(message, channel="#squadron-" + str(scouterteam))
+                slack.send_test_results2(message, channel="#scouting-cmp2017")
+                #fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
+
 		print "Uploaded"
 
-		newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
-		newEndOfmatchThread.start()
+		#newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
+		#newEndOfmatchThread.start()
 
 		return jsonify({"status": "success"})
 	except Exception, e:

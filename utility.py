@@ -74,6 +74,18 @@ def find_wrong_data(event):
 
 
 fb.authenticate(firebase_secret)
+#for i in fb.get_teams("2017cave"):
+#    newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=("2017cave", i))
+#        newEndOfmatchThread.start()
+#fb.end_of_match("2017casj", 8)
+#change_match("2017casj", 4904, 4904, 82)
+#change_team("2017casj", 799, 766, 71)
+#change_team("2017casj", 4158, 4159, 70)
+#change_match("2017casj", 971, 66, 67)
+#change_team("2017casj", 1357, 1351, 85)
+#change_match("2017casj", 100, 92, 82)
+#change_team("2017casj", 6415, 6418, 79)
+#change_team("2017casj", 952, 852, 86)
 #change_team("2017casj", 2145, 2135, 1)
 #change_match("2017casj", 6410, 14, 15)
 #change_match("2017casj", 971, 33, 34)
@@ -88,7 +100,6 @@ fb.authenticate(firebase_secret)
 # for i in fb.get_teams("2017casj"):
 #     newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=("2017casj", i))
 #     newEndOfmatchThread.start()
-
 #change_team("2017casj", 2474, 2473, 30)
 #change_team("2017casj", 3382, 3482, 26)
 #switch_team_match("2017casj", 2643, "qm", 50)
@@ -99,11 +110,12 @@ fb.authenticate(firebase_secret)
 #find_no_pit("2017casj")
 #change_team("2017casj", 2613, 2813, 12694501)
 #change_team("2017casj", 5739, 5737, 111111111)
-# cc.calculate_adjusted_dprs("2017cave")
-#dict = cc.calculate_defensible_oprs("2017cave")
+#cc.calculate_adjusted_dprs("2017casj")
+#dict = cc.calculate_adjusted_dprs("2017casj")
 #for key in dict.keys():
-#    fb.put("2017cave/teams/" + str(key) + "/data", "Cc-Defensible-OPR", dict[key])
-#cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
+#    print dict[key]
+#    fb.put("2017casj/teams/" + str(key) + "/data", "Cc-Adjusted-DPR", dict[key])
+#cc.calculate_goals("2017casj", "Auto", "Fuel-Low")
 #cc.calculate_defensible_oprs("2017cave")
 #import_skyes()
 # cc.calculate_goals("2017cave", "Auto", "Fuel-Low")
@@ -124,12 +136,11 @@ fb.authenticate(firebase_secret)
 #change_team("2017cave", 881, 981, 4)
 #change_team("2017cave", 4954, 4964, 25)
 #change_event_for_pit("2017cave", "2017casj")
-#for team in tba.get_teams("2017cave"):
-#    if team != 114 and team != 1661 and team != 2489 and team != 3859 and team != 3863 and team != 3882 and team != 3965 and team != 4913 and team != 5477 and team != 5678 and team != 6764:
+#for team in tba.get_teams("2017casj"):
 #        print team
-#        if fb.get("2017cave/teams/" + str(team), "timd") == None:
+#        if fb.get("2017casj/teams/" + str(team), "timd") == None:
 #            print "hi"
-#        fb.end_of_match("2017cave", team)
+#        fb.end_of_match("2017casj", team)
 #test_calc("2017inwla")
 #change_match("2017inwla", 4103, 10, 11)
 #switch_team_match("2017casj", 100, "qm", 8)
