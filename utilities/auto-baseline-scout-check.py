@@ -20,4 +20,4 @@ for i in firebase_data["teams"].keys():
 				mistakes[messed_up_person] = 1
 
 for i in mistakes.keys():
-	print str(i) + " BEEFED " + str(mistakes[i]) + " TIMES "
+	print str(i) + " MESSED UP " + str(mistakes[i]) + " TIMES "
