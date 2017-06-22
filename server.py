@@ -129,13 +129,14 @@ def upload_data(auth):
 	print data
 
 	try:
-		#event = data["Event"]
-                event = "testing"
+		event = data["Event"]
+                #event = "testing"
 		team = data["Team-Number"]
-                #comp_level = data["Comp-Level"]
-                #matchNumber = data["Match-Number"]
-                comp_level = "pr"
-                matchNumber = 0
+                comp_level = data["Comp-Level"]
+                matchNumber = data["Match-Number"]
+                #comp_level = "pr"
+                #matchNumber = 0
+                """
                 if data["Comp-Level"] == "sf":
                         matchNumber = 5
                 elif data["Comp-Level"] == "qf":
@@ -148,6 +149,7 @@ def upload_data(auth):
                         }.get(data["Match-Number"])
                 if matchNumber == None:
                         matchNumber = data["Match-Number"]
+                """
                 matchIn = data["Match-In"]
 
 		uploadable = {}
@@ -156,9 +158,9 @@ def upload_data(auth):
 			if k not in ["Event", "Team-Number", "Comp-Level", "Match-Number", "Match-In", "Accept-Encoding", "User-Agent", "Accept", "Accept-Language", "Connection", "Content-Length", "Content-Type", "Host"]:
 				uploadable[k] = data[k]
 
-                #if int(uploadable["Auto-Gears"]) > 0:
-                #        uploadable["Auto-Baseline"] = "1"
-
+                if int(uploadable["Auto-Gears"]) > 0:
+                        uploadable["Auto-Baseline"] = "1"
+                """
                 scouterteam = 0
                 for t in ["8", "1339", "4561", "5472", "5499", "6560"]:
                         if t in uploadable["Name"]:
@@ -188,12 +190,14 @@ def upload_data(auth):
                         message = uploadable["Name"] + " (Team " + str(scouterteam) + ") has failed match " + str(matchNumber) + " (Team " + str(team) + ") of the practical test. Incorrect reponses:" + message
                 slack.send_test_results1(message, channel="#squadron-" + str(scouterteam))
                 slack.send_test_results2(message, channel="#scouting-cmp2017")
-                #fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
+                """
+                fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
 
 		print "Uploaded"
-
-		#newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
-		#newEndOfmatchThread.start()
+                print event
+                
+		newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
+		newEndOfmatchThread.start()
 
 		return jsonify({"status": "success"})
 	except Exception, e:

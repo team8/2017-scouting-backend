@@ -21,6 +21,9 @@ def put(url, key, value):
 def get(url, key):
         return fb.get(url, key)
 
+def delete(url, key):
+        fb.delete(url, key)
+
 def get_teams(event):
         print "Getting teams for event " + str(event)
         dict = fb.get(str(event), "teams")
@@ -162,7 +165,9 @@ def get_real_data(event, team, comp_level):
 	print "Getting real TIMD data for team " + str(team) + " in " + str(comp_level) + " matches at " + str(event)
 	data = parse_firebase_unicode(fb.get(event + "/teams/" + str(team), None))
 	real_data = data["timd"][comp_level]
-	return real_data
+        if real_data.get("test") is not None:
+                del real_data["test"]
+        return real_data
 
 def get_stat_average_per_match(event, team, stat, real_data):
 

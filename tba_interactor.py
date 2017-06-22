@@ -17,7 +17,8 @@ def get_matches_with_teams(eventKey):
 
 	return_val = []
 	for i in jsonvar:
-		return_val.append(TBAMatch(i))
+                #if i.get("match_number") <= 99:
+                return_val.append(TBAMatch(i))
 
 	return return_val
 

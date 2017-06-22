@@ -16,6 +16,12 @@ def change_team(event, team1, team2, match):
     timd = fb.get(str(event) + "/teams/" + str(team1) + "/timd/qm", str(match))
     fb.put(str(event) + "/teams/" + str(team2) + "/timd/qm", match, timd)
 
+def change_team_for_pit(event, team1, team2):
+    data = fb.get(str(event) + "/teams/", str(team1))
+    if data is not None:
+        pit = fb.parse_firebase_unicode(data).get("pit")
+        fb.put(str(event) + "/teams/" + str(team2), "pit", pit)
+
 def switch_team_match(event, team, comp_level, match):
     timd = fb.get(str(event) + "/teams/" + str(match) + "/timd/" + str(comp_level), str(team))
     print(timd)
@@ -29,7 +35,8 @@ def test_calc(event):
 def change_event_for_pit(event1, event2):
     teams = fb.get(str(event1), "teams")
     for (team) in teams:
-        if fb.get(str(event2) + "/teams/" + str(team), "pit") is None:
+        if fb.get(str(event2) + "/teams", str(team)) is not None and fb.get(str(event2) + "/teams/" + str(team), "pit") is None:
+            print team
             data = fb.get(str(event1) + "/teams/", str(team))
             if data is not None:
                 pit = fb.parse_firebase_unicode(data).get("pit")
@@ -71,8 +78,37 @@ def find_wrong_data(event):
             if valid == False:
                 print "Bad data for team " + str(team) + " in match " + str(timd)
 
-            
+def change_list(event):
+    teams = fb.get(str(event), "teams")
+    for (team) in teams:
+        l = fb.get(str(event) + "/teams/" + str(team) + "/timd", "qm")
+#        if l is not None:
+#            if l.get("test") is not None:
+#                print team
+#                fb.delete(str(event) + "/teams/" + str(team) + "/timd/qm", "test")
+        if isinstance(l, list):
+            print team
+            fb.put(str(event) + "/teams/" + str(team) + "/timd/qm", "test", "test")
+            """
+            timd = l[1]
+            d = {"1": timd}
+            print d
+            fb.put(str(event) + "/teams/" + str(team) + "/timd", "qm", d)
+            """
+               
 fb.authenticate(firebase_secret)
+fb.end_of_match("2017roe", 4276)
+"""
+teams = fb.get("2017roe", "teams")
+for (team) in teams:
+    if fb.get("2017roe/teams/" + str(team) + "/timd/qm", 1) is not None:
+        print team
+        fb.end_of_match("2017roe", team)
+"""
+#change_list("2017roe")
+#change_event_for_pit("2017casj", "2017roe")
+#change_team_for_pit("2017roe", 314014, 3140)
+#change_team_for_pit("2017roe", 3616, 3316)
 #for i in fb.get_teams("2017cave"):
 #    newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=("2017cave", i))
 #        newEndOfmatchThread.start()
@@ -101,7 +137,7 @@ fb.authenticate(firebase_secret)
 #change_match("2017casj", 846, 28548, 13)
 #find_no_auto_notes("2017casj")
 #change_event_for_pit("2017casj_practice", "2017casj")
-#find_no_pit("2017casj")
+#find_no_pit("2017roe")
 #change_team("2017casj", 2613, 2813, 12694501)
 #change_team("2017casj", 5739, 5737, 111111111)
 #cc.calculate_adjusted_dprs("2017casj")
