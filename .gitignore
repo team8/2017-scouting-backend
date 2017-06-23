@@ -10,3 +10,6 @@ venv/
 q/
 Python*/
 Python*.tgz
+
+*.csv
+*.json
