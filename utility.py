@@ -1,4 +1,4 @@
-import tba_interactor as tba
+#import tba_interactor as tba
 import firebase_interactor as fb
 import sys
 # import cc
