@@ -143,13 +143,13 @@ def upload_data(auth):
 
                 if int(uploadable["Auto-Gears"]) > 0:
                         uploadable["Auto-Baseline"] = "1"
-                
-        fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
+                        
+		fb.upload_timd_stat(event, team, comp_level, matchNumber, uploadable)
         
-        fb.upload_timd_stat(event, team, comp_level, "test", "test") # weird error causing the first match to not be interpreted as a dictionary
+		fb.upload_timd_stat(event, team, comp_level, "test", "test") # weird error causing the first match to not be interpreted as a dictionary
 
 		print "Uploaded"
-        print event
+		print event
                 
 		newEndOfmatchThread = threading.Thread(target=fb.end_of_match, args=(event, team))
 		newEndOfmatchThread.start() # start the calculations in a new thread so that the user doesn't wait

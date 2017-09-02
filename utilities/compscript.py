@@ -4,7 +4,7 @@ import tba_interactor as tba
 def main():
     keys = []
     count = []
-    for team in tba.get_teams("2017casj"):
+    for team in tba.get_teams("2017cc"):
         events = tba.get_data("/team/frc" + str(team) + "/2017/events")
         for event in events:
             key = event["name"]
