@@ -5,6 +5,8 @@ Team 8's 2017 Scouting System consists of three parts:
 * Collection App - iPad app used by scouters in the stands to collect raw match data and submit it to the server via QR code scanning/uploading.
 * Backend Server - Python program constantly running on a private server that receives match data, performs calculations on it, and submits it to Firebase and the viewer app.
 
+# Running the server
+
 Start the server by running
 
 ```
